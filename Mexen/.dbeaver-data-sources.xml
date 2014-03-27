@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data-sources>
+	<data-source id="mysql5-1395936629580--634338835" provider="mysql" driver="mysql5" name="MySQL - tell" create-date="1395936851615" save-password="true" show-system-objects="true" read-only="false">
+		<connection host="localhost" port="3306" server="" database="tell" url="jdbc:mysql://localhost:3306/tell" user="tell" password="BwEKLFVLQRIEBgc8FgVANsc=" home="/usr" type="dev">
+			<network-handler type="TUNNEL" id="ssh_tunnel" enabled="true" user="vincent" save-password="true" password="AwUIJEBBQRMXcuc=">
+				<property name="port" value="22"/>
+				<property name="host" value="maxhovens.nl"/>
+				<property name="keyPath" value="/home/vincent/.ssh/id_rsa"/>
+				<property name="authType" value="PUBLIC_KEY"/>
+			</network-handler>
+			<network-handler type="PROXY" id="socks_proxy" enabled="false" user="" save-password="false">
+				<property name="socks-host" value=""/>
+				<property name="socks-port" value="1080"/>
+			</network-handler>
+		</connection>
+	</data-source>
+</data-sources>
