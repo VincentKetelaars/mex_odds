@@ -17,15 +17,12 @@
 package nl.vincentketelaars.mexen;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Random;
 
 import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,10 +31,13 @@ import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
-public class RollDice extends Activity implements SensorEventListener {
+public class RollDice extends Activity {
 	private final int rollAnimations = 50;
 	private final int delayTime = 15;
 	private Resources res;
@@ -46,25 +46,21 @@ public class RollDice extends Activity implements SensorEventListener {
 	private final Random randomGen = new Random();
 	@SuppressWarnings("unused")
 	private int diceSum;
-	private int roll[] = new int[] { 6, 6 };
-	private ImageView die1;
-	private ImageView die2;
+	private int roll[];
+	private ImageView[] dies;
+	private boolean[] vast;
 	private LinearLayout diceContainer;
-        private SensorManager sensorMgr; 
 	private Handler animationHandler;
-	private long lastUpdate = -1;
-	private float x, y, z;
-	private float last_x, last_y, last_z;
-	private boolean paused = false;
-	private static final int UPDATE_DELAY = 50;
-	private static final int SHAKE_THRESHOLD = 800;
+	private TextView chanceTextView;
+	private TextView higherChanceTextView;
+	private Activity activity;
+	private Button throw_button;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.game);
-		paused = false;
 		
 		// Make title bar icon clickable, and go home
 		getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -80,43 +76,65 @@ public class RollDice extends Activity implements SensorEventListener {
 			setTitle("Dice");
 		}
 		
+		dies = new ImageView[2]; // Set the number of dice
+		vast = new boolean[2]; // false by default
+		roll = new int[] { 6, 6 };
+		
 		// Get the dice
 		res = getResources();
 		for (int i = 0; i < 6; i++) {
 			dice[i] = res.getDrawable(diceImages[i]);
 		}
-		diceContainer = (LinearLayout) findViewById(R.id.diceContainer);
+		diceContainer = (LinearLayout) findViewById(R.id.dice_container);
 		diceContainer.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				try {
-					rollDice();
-				} catch (Exception e) {};
+				for (int i = 0; i < dies.length; i++) {
+					if (v.getId() == dies[i].getId()) {
+						vast[i] = true;
+					}
+				}
 			}
 		});
-		die1 = (ImageView) findViewById(R.id.die1);
-		die2 = (ImageView) findViewById(R.id.die2);
+		// dice
+		dies[0] = (ImageView) findViewById(R.id.die1);
+		dies[1] = (ImageView) findViewById(R.id.die2);
+		
+		// Set drawable
 		animationHandler = new Handler() {
 			public void handleMessage(Message msg) {
-				die1.setImageDrawable(dice[roll[0]]);
-				die2.setImageDrawable(dice[roll[1]]);
+				for (int i = 0; i < dies.length; i++) {
+					dies[i].setImageDrawable(dice[roll[i]]);
+				}
 			}
 		};
-		sensorMgr = (SensorManager) getSystemService(SENSOR_SERVICE);
-		boolean accelSupported = sensorMgr.registerListener(this,
-				sensorMgr.getDefaultSensor(SensorManager.SENSOR_ACCELEROMETER),	SensorManager.SENSOR_DELAY_GAME);
-		if (!accelSupported) sensorMgr.unregisterListener(this); //no accelerometer on the device
-		rollDice();
+		
+		chanceTextView = (TextView) findViewById(R.id.throw_chance_result_textview);
+		higherChanceTextView = (TextView) findViewById(R.id.throw_higher_chance_result_textview);
+		activity = this;
+		
+		throw_button = (Button) findViewById(R.id.throw_button);
+		throw_button.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				rollDice();
+			}
+		});
 	}
 
 	private void rollDice() {
-		if (paused) return;
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				for (int i = 0; i < rollAnimations; i++) {
-					doRoll();
+					doRoll();					
 				}
+				activity.runOnUiThread(new Runnable() {
+					public void run() {
+						chanceTextView.setText(floatToPercentage(determineChance(roll[0] + 1, vast[0], roll[1] + 1, vast[1])));
+						higherChanceTextView.setText(floatToPercentage(determineChanceHigher(roll[0] + 1, vast[0], roll[1] + 1, vast[1])));
+					}
+				});
 			}
 		}).start();
 		MediaPlayer mp = MediaPlayer.create(this, R.raw.roll);
@@ -128,12 +146,14 @@ public class RollDice extends Activity implements SensorEventListener {
 			e.printStackTrace();
 		}
 		mp.start();
+		
 	}
 
 	private void doRoll() { // only does a single roll
-		roll[0] = randomGen.nextInt(6);
-		roll[1] = randomGen.nextInt(6);
-		diceSum = roll[0] + roll[1] + 2; // 2 is added because the values of the rolls start with 0 not 1
+		for (int i = 0; i < dies.length; i++) {
+			if (!vast[i])
+				roll[i] = randomGen.nextInt(6);
+		}
 		synchronized (getLayoutInflater()) {
 			animationHandler.sendEmptyMessage(0);
 		}
@@ -143,42 +163,45 @@ public class RollDice extends Activity implements SensorEventListener {
 			e.printStackTrace();
 		}
 	}
-
-	public void onResume() {
-		super.onResume();
-		paused = false;
+	
+	private float determineChance(int d1, boolean v1, int d2, boolean v2) {
+		if (d1 == d2)
+			return 1 / 6f / 6f;
+		return 1 / 6f / 6f * 2;
 	}
 	
-	public void onPause() {
-		super.onPause();
-		paused = true;
-	}
-
-	@Override
-	public void onSensorChanged(SensorEvent event) {
-		Sensor mySensor = event.sensor;
-		if (mySensor.getType() == SensorManager.SENSOR_ACCELEROMETER) {
-			long curTime = System.currentTimeMillis();
-			if ((curTime - lastUpdate) > UPDATE_DELAY) {
-				long diffTime = (curTime - lastUpdate);
-				lastUpdate = curTime;
-				x = event.values[SensorManager.DATA_X];
-				y = event.values[SensorManager.DATA_Y];
-				z = event.values[SensorManager.DATA_Z];
-				float speed = Math.abs(x + y + z - last_x - last_y - last_z) / diffTime * 10000;
-				if (speed > SHAKE_THRESHOLD) { //the screen was shaked
-					rollDice();
-				}
-				last_x = x;
-				last_y = y;
-				last_z = z;
-			}
+	private float determineChanceHigher(int d1, boolean v1, int d2, boolean v2) {
+		if (d2 > d1) {
+			int x = d2;
+			d2 = d1;
+			d1 = x;
 		}
+		if (d1 == d2) // Hundreds
+			return (6 - d1 + 2) / 36f; // Add 2 for the mex
+		// d1 > d2
+		int num_throws = 8; // Hundreds + mex
+		switch (d1) {
+		case 2: // mex
+			return 0f;
+		case 3:
+			if (d2 == 1)
+				return 0f; // 31,There is nothing higher, TODO: add string
+			return 34 / 36f; // 32, everything is higher
+		case 4:
+			num_throws += 3 * 2;
+		case 5:
+			num_throws += 4 * 2;
+		case 6:
+			num_throws += 5 * 2;
+			break;
+		}
+		num_throws -= d2 * 2; // Minus the ones you beat with the same d1
+		return num_throws / 36f;
 	}
-
-	@Override
-	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		return; //this method isn't used
+	
+	private String floatToPercentage(float x) {
+		int percentage = Math.round(x * 100);
+		return String.format(Locale.getDefault(), "%d%%", percentage);
 	}
 	
 	@Override
