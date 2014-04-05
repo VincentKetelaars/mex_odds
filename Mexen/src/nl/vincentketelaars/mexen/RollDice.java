@@ -16,25 +16,24 @@
 
 package nl.vincentketelaars.mexen;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.Random;
 
 import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.media.MediaPlayer;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.NavUtils;
+import android.util.SparseIntArray;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class RollDice extends Activity {
@@ -49,12 +48,13 @@ public class RollDice extends Activity {
 	private int roll[];
 	private ImageView[] dies;
 	private boolean[] vast;
-	private LinearLayout diceContainer;
 	private Handler animationHandler;
 	private TextView chanceTextView;
 	private TextView higherChanceTextView;
 	private Activity activity;
 	private Button throw_button;
+	private SoundPool soundPool;
+	private SparseIntArray soundMap;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -76,29 +76,24 @@ public class RollDice extends Activity {
 			setTitle("Dice");
 		}
 		
+		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+		soundMap = new SparseIntArray();
+		soundMap.put(R.raw.roll, soundPool.load(this, R.raw.roll, 1)); // Note: If load returns 0 it failed
+		
 		dies = new ImageView[2]; // Set the number of dice
 		vast = new boolean[2]; // false by default
-		roll = new int[] { 6, 6 };
+		roll = new int[] { 1, 0 }; // Initialize to mex
 		
 		// Get the dice
 		res = getResources();
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < diceImages.length; i++) {
 			dice[i] = res.getDrawable(diceImages[i]);
 		}
-		diceContainer = (LinearLayout) findViewById(R.id.dice_container);
-		diceContainer.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				for (int i = 0; i < dies.length; i++) {
-					if (v.getId() == dies[i].getId()) {
-						vast[i] = true;
-					}
-				}
-			}
-		});
+		
 		// dice
 		dies[0] = (ImageView) findViewById(R.id.die1);
 		dies[1] = (ImageView) findViewById(R.id.die2);
+
 		
 		// Set drawable
 		animationHandler = new Handler() {
@@ -108,6 +103,24 @@ public class RollDice extends Activity {
 				}
 			}
 		};
+		
+		// Listener that increments the number on the dice
+		OnClickListener diceListener = new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				for (int i = 0; i  < dies.length; i++) {
+					if (dies[i].getId() == v.getId()) {
+						roll[i] = (roll[i] + 1) % diceImages.length;
+					}
+				}
+				animationHandler.sendEmptyMessage(0);
+				evaluateChances();
+			}
+		};	
+		
+		for (ImageView d : dies) {
+			d.setOnClickListener(diceListener); // Set the listener for each dice
+		}
 		
 		chanceTextView = (TextView) findViewById(R.id.throw_chance_result_textview);
 		higherChanceTextView = (TextView) findViewById(R.id.throw_higher_chance_result_textview);
@@ -129,24 +142,10 @@ public class RollDice extends Activity {
 				for (int i = 0; i < rollAnimations; i++) {
 					doRoll();					
 				}
-				activity.runOnUiThread(new Runnable() {
-					public void run() {
-						chanceTextView.setText(floatToPercentage(determineChance(roll[0] + 1, vast[0], roll[1] + 1, vast[1])));
-						higherChanceTextView.setText(floatToPercentage(determineChanceHigher(roll[0] + 1, vast[0], roll[1] + 1, vast[1])));
-					}
-				});
+				evaluateChances();
 			}
 		}).start();
-		MediaPlayer mp = MediaPlayer.create(this, R.raw.roll);
-		try {
-			mp.prepare();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		mp.start();
-		
+		soundPool.play(soundMap.get(R.raw.roll), 1f, 1f, 0, 0, 1f); // Play once at current volume
 	}
 
 	private void doRoll() { // only does a single roll
@@ -162,6 +161,15 @@ public class RollDice extends Activity {
 		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void evaluateChances() {
+		activity.runOnUiThread(new Runnable() {
+			public void run() {
+				chanceTextView.setText(floatToPercentage(determineChance(roll[0] + 1, vast[0], roll[1] + 1, vast[1])));
+				higherChanceTextView.setText(floatToPercentage(determineChanceHigher(roll[0] + 1, vast[0], roll[1] + 1, vast[1])));
+			}
+		});
 	}
 	
 	private float determineChance(int d1, boolean v1, int d2, boolean v2) {
