@@ -20,7 +20,6 @@ import java.util.Locale;
 import java.util.Random;
 
 import android.app.Activity;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -39,12 +38,9 @@ import android.widget.TextView;
 public class RollDice extends Activity {
 	private final int rollAnimations = 50;
 	private final int delayTime = 15;
-	private Resources res;
 	private final int[] diceImages = new int[] { R.drawable.d1, R.drawable.d2, R.drawable.d3, R.drawable.d4, R.drawable.d5, R.drawable.d6 };
 	private Drawable dice[] = new Drawable[6];
 	private final Random randomGen = new Random();
-	@SuppressWarnings("unused")
-	private int diceSum;
 	private int roll[];
 	private ImageView[] dies;
 	private boolean[] vast;
@@ -65,17 +61,6 @@ public class RollDice extends Activity {
 		// Make title bar icon clickable, and go home
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
-		// Set title
-		int game = getIntent().getIntExtra("game", -1);
-		if (game > 0) {
-			if (game == R.id.mex_button)
-				setTitle(getResources().getString(R.string.mexen));
-			else
-				setTitle(getResources().getString(R.string.blind_mexen));
-		} else {
-			setTitle("Dice");
-		}
-		
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		soundMap = new SparseIntArray();
 		soundMap.put(R.raw.roll, soundPool.load(this, R.raw.roll, 1)); // Note: If load returns 0 it failed
@@ -85,9 +70,8 @@ public class RollDice extends Activity {
 		roll = new int[] { 1, 0 }; // Initialize to mex
 		
 		// Get the dice
-		res = getResources();
 		for (int i = 0; i < diceImages.length; i++) {
-			dice[i] = res.getDrawable(diceImages[i]);
+			dice[i] = getResources().getDrawable(diceImages[i]);
 		}
 		
 		// dice

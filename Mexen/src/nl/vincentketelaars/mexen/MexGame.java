@@ -5,28 +5,27 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.ImageView;
 
 public class MexGame extends Activity implements OnClickListener {
 	
-	Button mexButton; 
-	Button blindMexButton; 
+	ImageView mexButton; 
+	ImageView blindMexButton; 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_mex_game);
         
-        mexButton = (Button) findViewById(R.id.mex_button);
+        mexButton = (ImageView) findViewById(R.id.mex_2_button);
         mexButton.setOnClickListener(this);
-        blindMexButton = (Button) findViewById(R.id.blind_mex_button);
+        blindMexButton = (ImageView) findViewById(R.id.mex_3_button);
         blindMexButton.setOnClickListener(this);
     }
 
 	@Override
 	public void onClick(View v) {
 		Intent intent = new Intent(this, RollDice.class);
-		intent.putExtra("game", v.getId());
 		startActivity(intent);
 	}
 

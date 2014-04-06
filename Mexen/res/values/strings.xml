@@ -2,8 +2,8 @@
 <resources>
 
     <string name="app_name">Mexen</string>
-    <string name="mexen">Mexen</string>
-    <string name="blind_mexen">Blind Mexen</string>
+    <string name="mexen_2_dice">2 Dobbels</string>
+    <string name="mexen_3_dice">3 Dobbels</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="throw_dice">Gooi!</string>

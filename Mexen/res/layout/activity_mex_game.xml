@@ -5,22 +5,24 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/mex_button"
-        android:layout_width="match_parent"
-        android:layout_height="68dp"
+    <ImageView
+        android:id="@+id/mex_2_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginBottom="131dp"
-        android:text="@string/mexen" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="81dp"
+        android:src="@drawable/d2"
+        android:contentDescription="@string/mexen_2_dice"/>
 
-    <Button
-        android:id="@+id/blind_mex_button"
-        android:layout_width="match_parent"
-        android:layout_height="68dp"
-        android:layout_alignParentLeft="true"
+    <ImageView
+        android:id="@+id/mex_3_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/mex_2_button"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="94dp"
-        android:text="@string/blind_mexen" />
+        android:layout_marginTop="80dp"
+        android:src="@drawable/d3"
+        android:contentDescription="@string/mexen_3_dice"/>
 
 </RelativeLayout>
