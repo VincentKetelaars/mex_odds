@@ -117,6 +117,7 @@ public class RollDice extends Activity {
 				rollDice();
 			}
 		});
+		System.out.println("Width: " + getWindowManager().getDefaultDisplay().getWidth() / getResources().getDisplayMetrics().density);
 	}
 
 	private void rollDice() {

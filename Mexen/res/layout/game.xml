@@ -13,22 +13,54 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
-        <ImageView
-            android:id="@+id/die1"
+        <FrameLayout
+            android:id="@+id/die_frame_1"
             android:layout_width="150dip"
             android:layout_height="150dip"
-            android:layout_marginLeft="5dip"
-            android:contentDescription="@string/dice"
-            android:src="@drawable/d2" />
+            android:layout_marginLeft="10dip" >
+            
+	        <ImageView
+	            android:id="@+id/die1"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:contentDescription="@string/dice"
+	            android:src="@drawable/d2" />
+	        
+	        <ImageView 
+	            android:id="@+id/die_overlay_1"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:alpha="0.4"
+	            android:visibility="invisible"
+	            android:src="@drawable/lightgray" 
+	            android:contentDescription="@string/gray_overlay" />
+              
+        </FrameLayout>
+        
+        <FrameLayout
+            android:id="@+id/die_frame_2"
+            android:layout_width="150dip"
+            android:layout_height="150dip"
+            android:layout_marginLeft="44dip"
+            android:layout_marginRight="10dip" >
 
-        <ImageView
-            android:id="@+id/die2"
-            android:layout_width="150dip"
-            android:layout_height="150dip"
-            android:layout_marginLeft="30dip"
-            android:layout_marginRight="5dip"
-            android:contentDescription="@string/dice"
-            android:src="@drawable/d1" />
+	        <ImageView
+	            android:id="@+id/die2"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:contentDescription="@string/dice"
+	            android:src="@drawable/d1" />
+	        
+	        <ImageView 
+	            android:id="@+id/die_overlay_2"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:alpha="0.4"
+	            android:visibility="invisible"
+	            android:src="@drawable/gray_shape"
+	            android:contentDescription="@string/gray_overlay" />
+              
+        </FrameLayout>
 
     </LinearLayout>
 

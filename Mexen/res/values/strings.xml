@@ -12,5 +12,6 @@
     <string name="throw_chance_default">0%</string>
     <string name="throw_higher_chance">Kans om hoger te gooien:</string>
     <string name="throw_higher_chance_default">0%</string>
-
+	<string name="gray_overlay">gray overlay</string>
+    
 </resources>
