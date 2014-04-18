@@ -27,10 +27,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,6 +45,7 @@ public class RollDice extends Activity {
 	private final Random randomGen = new Random();
 	private int roll[];
 	private ImageView[] dies;
+	private ImageView[] vastImages;
 	private boolean[] vast;
 	private Handler animationHandler;
 	private TextView chanceTextView;
@@ -65,7 +68,10 @@ public class RollDice extends Activity {
 		soundMap = new SparseIntArray();
 		soundMap.put(R.raw.roll, soundPool.load(this, R.raw.roll, 1)); // Note: If load returns 0 it failed
 		
-		dies = new ImageView[2]; // Set the number of dice
+		dies = new ImageView[] {(ImageView) findViewById(R.id.die1), 
+				(ImageView) findViewById(R.id.die2)}; // Set the number of dice
+		vastImages = new ImageView[] {(ImageView) findViewById(R.id.die_overlay_1), 
+				(ImageView) findViewById(R.id.die_overlay_2)}; // Set the number of vast
 		vast = new boolean[2]; // false by default
 		roll = new int[] { 1, 0 }; // Initialize to mex
 		
@@ -73,11 +79,6 @@ public class RollDice extends Activity {
 		for (int i = 0; i < diceImages.length; i++) {
 			dice[i] = getResources().getDrawable(diceImages[i]);
 		}
-		
-		// dice
-		dies[0] = (ImageView) findViewById(R.id.die1);
-		dies[1] = (ImageView) findViewById(R.id.die2);
-
 		
 		// Set drawable
 		animationHandler = new Handler() {
@@ -93,17 +94,45 @@ public class RollDice extends Activity {
 			@Override
 			public void onClick(View v) {
 				for (int i = 0; i  < dies.length; i++) {
-					if (dies[i].getId() == v.getId()) {
+					if (dies[i].getId() == v.getId() && !vast[i]) {
 						roll[i] = (roll[i] + 1) % diceImages.length;
 					}
 				}
 				animationHandler.sendEmptyMessage(0);
 				evaluateChances();
 			}
-		};	
+		};
+		
+		// Listener that sets vast
+		OnLongClickListener vastListener = new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				for (int i = 0; i  < dies.length; i++) {
+					if (dies[i].getId() == v.getId()) {
+						if (vastImages[i].getVisibility() == View.VISIBLE && !vast[vast.length - 1 - i] &&
+							roll[i] <= 2) { // Only vast on 1, 2 or 3
+							vastImages[i].setVisibility(View.INVISIBLE);
+							vast[i] = false;
+							break;
+						}
+						// Note that the no mex vast rule should not affect 'devasting'
+						if (roll[0] == 0 && roll[1] == 1 || roll[0] == 1 && roll[1] == 0) // 12 or 21
+							break; // No vast with mex
+						if (vastImages[i].getVisibility() == View.INVISIBLE && !vast[vast.length - 1 - i] &&
+							roll[i] <= 2) { // Only vast on 1, 2 or 3
+							vastImages[i].setVisibility(View.VISIBLE);
+							vast[i] = true;
+						}
+					}
+				}
+				evaluateChances();
+				return true;
+			}
+		};
 		
 		for (ImageView d : dies) {
 			d.setOnClickListener(diceListener); // Set the listener for each dice
+			d.setOnLongClickListener(vastListener); // Set the long listener for each dice
 		}
 		
 		chanceTextView = (TextView) findViewById(R.id.throw_chance_result_textview);
@@ -117,7 +146,9 @@ public class RollDice extends Activity {
 				rollDice();
 			}
 		});
-		System.out.println("Width: " + getWindowManager().getDefaultDisplay().getWidth() / getResources().getDisplayMetrics().density);
+		Log.i("RollDice", String.format("Width: %f\nHeight: %f", 
+				getWindowManager().getDefaultDisplay().getWidth() / getResources().getDisplayMetrics().density,
+				getWindowManager().getDefaultDisplay().getHeight() / getResources().getDisplayMetrics().density));
 	}
 
 	private void rollDice() {
@@ -158,37 +189,84 @@ public class RollDice extends Activity {
 	}
 	
 	private float determineChance(int d1, boolean v1, int d2, boolean v2) {
+		if (vast[0] || vast[1])
+			return 1 / 6f;
 		if (d1 == d2)
 			return 1 / 6f / 6f;
 		return 1 / 6f / 6f * 2;
 	}
 	
+	/**
+	 * Determine the chance of throwing higher than the supplied dice results.
+	 * Take in account that one of the dice may be held 'vast'.
+	 * 21, Mex, is the highest. 31, Dispense, is not counted as higher, but also has no higher.
+	 * Same numbers are hundreds.
+	 */
 	private float determineChanceHigher(int d1, boolean v1, int d2, boolean v2) {
-		if (d2 > d1) {
+		if ((d2 > d1 && !v1 && !v2) || v2) { // Switch dice without vast to highest first, vast should be first
 			int x = d2;
 			d2 = d1;
 			d1 = x;
+			boolean y = v2;
+			v2 = v1;
+			v1 = y;
 		}
-		if (d1 == d2) // Hundreds
-			return (6 - d1 + 2) / 36f; // Add 2 for the mex
-		// d1 > d2
-		int num_throws = 8; // Hundreds + mex
-		switch (d1) {
-		case 2: // mex
-			return 0f;
-		case 3:
-			if (d2 == 1)
-				return 0f; // 31,There is nothing higher, TODO: add string
-			return 34 / 36f; // 32, everything is higher
-		case 4:
-			num_throws += 3 * 2;
-		case 5:
-			num_throws += 4 * 2;
-		case 6:
-			num_throws += 5 * 2;
-			break;
+		// d1 >= d2
+		int num_throws = 0;
+		if (v1 || v2) { // vast
+			switch (d1) {
+			case 1: // 11
+				if (d2 == 1)
+					return 1 / 6f; // 21
+				if (d2 == 2 || d2 == 3) // 21, 31
+					return 0f; // no higher
+				return (6 - d2 + 2) / 6f; // EXAMPLE: d2 == 4, (11, 21, 51, 61 are higher), (6 - 4 + 2)
+			case 2:
+				if (d2 == 1) // 21
+					return 0f; // no higher
+				if (d2 == 2)
+					return 1 / 6f; // 22, so only 21
+				return (6 - d2 + 2) / 6f; // EXAMPLE: d2 == 3, (21, 22, 42, 52, 62 are higher), (6 - 3 + 2)
+			case 3:
+				if (d2 == 1)
+					return 0f; // 31, there is nothing higher!
+				if (d2 == 2) {
+					if (v1) // 3 is vast
+						return 4 / 6f; // (33, 43, 53, 63 are higher)
+					return 5 / 6f; // 2 is vast, others are higher 
+				}					
+				if (d2 == 3)
+					return 0f; // 33, highest
+				return (6 - d2 + 1) / 6f; // EXAMPLE: d2 == 4, (33, 53, 63 are higher), (6 - 4 + 1)
+			default:
+				Log.e("RollDice", String.format("The value of dice one, %d, should not be able to be vast", d1));
+			}
+		} else { // not vast
+			if (d1 == d2) // Hundreds
+				return (6 - d1 + 2) / 36f; // Count hundreds once, and add 2 for the mex
+			// d1 > d2
+			num_throws = 8; // Hundreds + mex
+			switch (d1) {
+			case 2: // 21
+				return 0f; // mex
+			case 3: // 31, 32
+				if (d2 == 1)
+					return 0f; // 31,There is nothing higher, TODO: add string
+				return 34 / 36f; // 32, everything is higher
+			// Add to the hundreds and mex
+			case 4: // 41, 42, 43
+				num_throws += 3 * 2; // Add all possibilities
+			case 5: // 51, 52, 53, 54
+				num_throws += 4 * 2; // Add all possibilities
+			case 6: // 61, 62, 63, 64, 65
+				num_throws += 5 * 2; // Add all possibilities
+				break;
+			default:
+				Log.e("RollDice", String.format("The value of dice one, %d, should not be possible", d1));
+			}
+			// EXAMPLE: d1=5, d2=2; 8 (Hundreds and mex) + 4 * 2 (51 - 54) + 5 * 2 (61 - 65) - 2 * 2 (51 - 52)
+			num_throws -= d2 * 2; // Minus the ones you beat with the same d1
 		}
-		num_throws -= d2 * 2; // Minus the ones you beat with the same d1
 		return num_throws / 36f;
 	}
 	

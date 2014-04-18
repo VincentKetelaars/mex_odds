@@ -32,7 +32,7 @@
 	            android:layout_height="fill_parent"
 	            android:alpha="0.4"
 	            android:visibility="invisible"
-	            android:src="@drawable/lightgray" 
+	            android:src="@drawable/gray_shape" 
 	            android:contentDescription="@string/gray_overlay" />
               
         </FrameLayout>
