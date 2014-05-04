@@ -13,6 +13,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        
         <activity
             android:name="nl.vincentketelaars.mexen.MexGame"
             android:label="@string/app_name" >
@@ -21,9 +22,20 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>        
+        </activity>
+        
         <activity
-            android:name="nl.vincentketelaars.mexen.RollDice"
+            android:name="nl.vincentketelaars.mexen.Roll2Dice"
+            android:label="@string/app_name"
+            android:parentActivityName="nl.vincentketelaars.mexen.MexGame" >
+            <!-- Older than API 16 -->
+            <meta-data
+            	android:name="android.support.PARENT_ACTIVITY"
+            	android:value="nl.vincentketelaars.mexen.MexGame" />
+        </activity>
+        
+        <activity
+            android:name="nl.vincentketelaars.mexen.Roll3Dice"
             android:label="@string/app_name"
             android:parentActivityName="nl.vincentketelaars.mexen.MexGame" >
             <!-- Older than API 16 -->

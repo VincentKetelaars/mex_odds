@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dice_container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="10dip" >
+    
+    <FrameLayout
+        android:id="@+id/die_frame_1"
+        android:layout_width="150dip"
+        android:layout_height="150dip"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dip" >
+            
+        <ImageView
+            android:id="@+id/die1"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/dice"
+            android:src="@drawable/d6" />
+        
+        <ImageView 
+            android:id="@+id/die_overlay_1"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:alpha="0.4"
+            android:visibility="invisible"
+            android:src="@drawable/gray_shape" 
+            android:contentDescription="@string/gray_overlay" />
+              
+    </FrameLayout>
+        
+
+    <LinearLayout
+        android:id="@+id/linear_image_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <FrameLayout
+            android:id="@+id/die_frame_2"
+            android:layout_width="150dip"
+            android:layout_height="150dip"
+            android:layout_marginLeft="10dip" >
+            
+	        <ImageView
+	            android:id="@+id/die2"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:contentDescription="@string/dice"
+	            android:src="@drawable/d2" />
+	        
+	        <ImageView 
+	            android:id="@+id/die_overlay_2"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:alpha="0.4"
+	            android:visibility="invisible"
+	            android:src="@drawable/gray_shape" 
+	            android:contentDescription="@string/gray_overlay" />
+              
+        </FrameLayout>
+        
+        <FrameLayout
+            android:id="@+id/die_frame_3"
+            android:layout_width="150dip"
+            android:layout_height="150dip"
+            android:layout_marginLeft="44dip"
+            android:layout_marginRight="10dip" >
+
+	        <ImageView
+	            android:id="@+id/die3"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:contentDescription="@string/dice"
+	            android:src="@drawable/d1" />
+	        
+	        <ImageView 
+	            android:id="@+id/die_overlay_3"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+	            android:alpha="0.4"
+	            android:visibility="invisible"
+	            android:src="@drawable/gray_shape"
+	            android:contentDescription="@string/gray_overlay" />
+              
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/throw_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/throw_dice" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="52dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/throw_chance_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/throw_chance" />
+        
+        <TextView
+	        android:id="@+id/throw_chance_result_textview"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
+	        android:text="@string/throw_chance_default" />
+
+	    <TextView
+	        android:id="@+id/throw_higher_chance_textview"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
+	        android:text="@string/throw_higher_chance" />
+	    
+	    <TextView
+	        android:id="@+id/throw_higher_chance_result_textview"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
+	        android:text="@string/throw_higher_chance_default" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -25,8 +25,16 @@ public class MexGame extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		Intent intent = new Intent(this, RollDice.class);
-		startActivity(intent);
+		switch (v.getId()) {
+		case R.id.mex_2_button:
+			Intent intent = new Intent(this, Roll2Dice.class);
+			startActivity(intent);
+			break;
+		case R.id.mex_3_button:
+			intent = new Intent(this, Roll3Dice.class);
+			startActivity(intent);
+			break;
+		}
 	}
 
 }
