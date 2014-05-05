@@ -51,14 +51,6 @@ public class Roll2Dice extends RollDice {
 		});
 	}
 	
-	private float determineChance(int d1, boolean v1, int d2, boolean v2) {
-		if (getVast(0) || getVast(1))
-			return 1 / 6f;
-		if (d1 == d2)
-			return 1 / 6f / 6f;
-		return 1 / 6f / 6f * 2;
-	}
-	
 	/**
 	 * Determine the chance of throwing higher than the supplied dice results.
 	 * Take in account that one of the dice may be held 'vast'.
@@ -131,5 +123,13 @@ public class Roll2Dice extends RollDice {
 			num_throws -= d2 * 2; // Minus the ones you beat with the same d1
 		}
 		return num_throws / 36f;
+	}
+
+	@Override
+	protected boolean isSpecialVastCase() {
+		// Note that the no mex vast rule should not affect 'devasting'
+		if (getRoll(0) == 0 && getRoll(1) == 1 || getRoll(0) == 1 && getRoll(1) == 0) // 12 or 21
+			return true; // No vast with mex
+		return false;
 	}
 }

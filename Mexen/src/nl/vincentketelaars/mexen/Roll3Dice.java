@@ -55,11 +55,17 @@ public class Roll3Dice extends RollDice {
 	}
 
 	private float determineChance(int d1, boolean v1, int d2, boolean v2, int d3, boolean v3) {
-		if (getVast(0) || getVast(1))
-			return 1 / 6f;
-		if (d1 == d2)
-			return 1 / 6f / 6f;
-		return 1 / 6f / 6f * 2;
+		if (v1)
+			return determineChance(d2, v2, d3, v3);
+		else if (v2)
+			return determineChance(d1, v1, d3, v3);
+		else if (v3)
+			return determineChance(d1, v1, d2, v2);
+		if (d1 == d2 && d2 == d3) // All the same
+			return 1 / 6f / 6f / 6f;
+		if (d1 == d2 || d2 == d3 || d1 == d3) // Two equals
+			return 1 / 6f / 6f / 6f * 3; // (1 / 6 / 6 / 6) * 3 
+		return 1 / 6f / 6f; // No equals (1 / 6 / 6 / 6) * 6
 	}
 
 	/**
@@ -132,5 +138,10 @@ public class Roll3Dice extends RollDice {
 			num_throws -= d2 * 2; // Minus the ones you beat with the same d1
 		}
 		return num_throws / 36f;
+	}
+
+	@Override
+	protected boolean isSpecialVastCase() {
+		return false;
 	}
 }

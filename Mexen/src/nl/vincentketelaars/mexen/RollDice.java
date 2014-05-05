@@ -121,19 +121,20 @@ public abstract class RollDice extends Activity {
 		// Listener that sets vast
 		OnLongClickListener vastListener = new OnLongClickListener() {
 			@Override
-			public boolean onLongClick(View v) {
+			public boolean onLongClick(View view) {
+				int numVast = 0;
+				for (boolean v : vast) {
+					if (v) numVast++;
+				}
 				for (int i = 0; i  < dies.length; i++) {
-					if (dies[i].getId() == v.getId()) {
-						if (vastImages[i].getVisibility() == View.VISIBLE && !vast[vast.length - 1 - i] &&
-							roll[i] <= 2) { // Only vast on 1, 2 or 3
+					if (dies[i].getId() == view.getId()) {
+						if (vastImages[i].getVisibility() == View.VISIBLE) {
 							vastImages[i].setVisibility(View.INVISIBLE);
 							vast[i] = false;
 							break;
 						}
-						// Note that the no mex vast rule should not affect 'devasting'
-						if (roll[0] == 0 && roll[1] == 1 || roll[0] == 1 && roll[1] == 0) // 12 or 21
-							break; // No vast with mex
-						if (vastImages[i].getVisibility() == View.INVISIBLE && !vast[vast.length - 1 - i] &&
+						if (isSpecialVastCase()) break;
+						if (vastImages[i].getVisibility() == View.INVISIBLE && numVast < dies.length - 1 &&
 							roll[i] <= 2) { // Only vast on 1, 2 or 3
 							vastImages[i].setVisibility(View.VISIBLE);
 							vast[i] = true;
@@ -150,6 +151,8 @@ public abstract class RollDice extends Activity {
 			d.setOnLongClickListener(vastListener); // Set the long listener for each dice
 		}
 	}
+	
+	protected abstract boolean isSpecialVastCase();
 
 	private void rollDice() {
 		new Thread(new Runnable() {
@@ -208,5 +211,13 @@ public abstract class RollDice extends Activity {
 	
 	protected boolean getVast(int index) {
 		return vast[index];
+	}
+	
+	protected float determineChance(int d1, boolean v1, int d2, boolean v2) {
+		if (v1 || v2)
+			return 1 / 6f;
+		if (d1 == d2)
+			return 1 / 6f / 6f;
+		return 1 / 6f / 6f * 2;
 	}
 }
