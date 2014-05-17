@@ -8,10 +8,10 @@
     <string name="action_settings">Settings</string>
     <string name="throw_dice">Gooi!</string>
     <string name="dice">Dobbelsteen</string>
-    <string name="throw_chance">Kans om dit te gooien:</string>
+    <string name="throw_chance">Kans om dit te gooien</string>
     <string name="throw_chance_default">6%</string>
     <string name="throw_chance_default_3">3%</string>
-    <string name="throw_higher_chance">Kans om hoger te gooien:</string>
+    <string name="throw_higher_chance">Kans om hoger te gooien</string>
     <string name="throw_higher_chance_default">0%</string>
 	<string name="gray_overlay">gray overlay</string>
     

@@ -17,9 +17,13 @@
 package nl.vincentketelaars.mexen;
 
 import android.app.Activity;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 public class Roll3Dice extends RollDice {
 	private Activity activity;
@@ -30,6 +34,33 @@ public class Roll3Dice extends RollDice {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_roll_dice_3);
 		setupViews();
+		
+		FrameLayout[] frames = new FrameLayout[] {(FrameLayout) findViewById(R.id.die_frame_1),
+				(FrameLayout) findViewById(R.id.die_frame_2),
+				(FrameLayout) findViewById(R.id.die_frame_3)};
+		Point size = getSize();
+		int width = size.x;
+		int height = size.y;
+		// Width will be restricted either by height or width. Dice should take max 50% of screen
+		int frameWidth = (int) Math.min(width * 0.44, height * 0.5 * 0.44); // Each dice 40%
+		// Ensure that the space between each dice is equal
+		int frameHeightMargin = (int) (height * 0.5 - frameWidth * 2) / 3; // Divide the remainder evenly
+		int frameWidthMarginOuter = (int) (width - 2 * frameWidth - frameHeightMargin) / 2; // Calculate outer
+		int frameWidthMarginCenter = (int) frameHeightMargin / 2; // Same spacing between dice
+		int frameWidthMarginUpper = (int) (width - frameWidth) / 2; // Upper only
+		for (int i = 0; i < frames.length; i++) {
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+			params.width = frameWidth;
+			params.height = frameWidth; // Square, so width equals height
+			if (i == 0) {
+				params.setMargins(frameWidthMarginUpper, frameHeightMargin, frameWidthMarginUpper, frameWidthMarginCenter); // Gravity is centered
+			} else if (i == 1) { // Left dice
+				params.setMargins(frameWidthMarginOuter, frameWidthMarginCenter, frameWidthMarginCenter, frameHeightMargin);
+			} else if (i == 2) {// Right dice
+				params.setMargins(frameWidthMarginCenter, frameWidthMarginCenter, frameWidthMarginOuter, frameHeightMargin);
+			}
+			frames[i].setLayoutParams(params);
+		}
 
 		ImageView[] dies = new ImageView[] {(ImageView) findViewById(R.id.die1), 
 				(ImageView) findViewById(R.id.die2), (ImageView) findViewById(R.id.die3)}; // Set the number of dice
@@ -73,6 +104,13 @@ public class Roll3Dice extends RollDice {
 	 * Take in account that one or two of the dice may be held 'vast'.
 	 */
 	private float determineChanceHigher(int d1, boolean v1, int d2, boolean v2, int d3, boolean v3) {
+		if (v1)
+			return determineChanceHigher(d2, v2, d3, v3);
+		else if (v2)
+			return determineChanceHigher(d1, v1, d3, v3);
+		else if (v3)
+			return determineChanceHigher(d1, v1, d2, v2);
+		
 		if ((d2 > d1 && !v1 && !v2) || v2) { // Switch dice without vast to highest first, vast should be first
 			int x = d2;
 			d2 = d1;
