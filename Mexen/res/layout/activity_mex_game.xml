@@ -1,17 +1,19 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical" >
+    
+    <TextView
+        android:id="@+id/choose_dice_textview"
+        style="@style/default_text_style"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/choose_dice" />
 
     <ImageView
         android:id="@+id/mex_2_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="81dp"
         android:src="@drawable/d2"
         android:contentDescription="@string/mexen_2_dice"/>
 
@@ -19,10 +21,7 @@
         android:id="@+id/mex_3_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/mex_2_button"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="80dp"
         android:src="@drawable/d3"
         android:contentDescription="@string/mexen_3_dice"/>
 
-</RelativeLayout>
+</LinearLayout>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/dice_container"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical" >
 
@@ -19,15 +19,15 @@
             
 	        <ImageView
 	            android:id="@+id/die1"
-	            android:layout_width="fill_parent"
-	            android:layout_height="fill_parent"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
 	            android:contentDescription="@string/dice"
 	            android:src="@drawable/d2" />
 	        
 	        <ImageView 
 	            android:id="@+id/die_overlay_1"
-	            android:layout_width="fill_parent"
-	            android:layout_height="fill_parent"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
 	            android:alpha="0.4"
 	            android:visibility="invisible"
 	            android:src="@drawable/gray_shape" 
@@ -42,15 +42,15 @@
 
 	        <ImageView
 	            android:id="@+id/die2"
-	            android:layout_width="fill_parent"
-	            android:layout_height="fill_parent"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
 	            android:contentDescription="@string/dice"
 	            android:src="@drawable/d1" />
 	        
 	        <ImageView 
 	            android:id="@+id/die_overlay_2"
-	            android:layout_width="fill_parent"
-	            android:layout_height="fill_parent"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
 	            android:alpha="0.4"
 	            android:visibility="invisible"
 	            android:src="@drawable/gray_shape"
@@ -74,29 +74,25 @@
 
         <TextView
             android:id="@+id/throw_chance_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/default_text_style"
             android:layout_gravity="center_horizontal"
             android:text="@string/throw_chance" />
         
         <TextView
 	        android:id="@+id/throw_chance_result_textview"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
+            style="@style/default_text_style"
 	        android:layout_gravity="center_horizontal"
 	        android:text="@string/throw_chance_default" />
 
 	    <TextView
 	        android:id="@+id/throw_higher_chance_textview"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
+            style="@style/default_text_style"
 	        android:layout_gravity="center_horizontal"
 	        android:text="@string/throw_higher_chance" />
 	    
 	    <TextView
 	        android:id="@+id/throw_higher_chance_result_textview"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
+            style="@style/default_text_style"
 	        android:layout_gravity="center_horizontal"
 	        android:text="@string/throw_higher_chance_default" />
 

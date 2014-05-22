@@ -16,18 +16,15 @@
 
 package nl.vincentketelaars.mexen;
 
-import android.app.Activity;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 public class Roll3Dice extends RollDice {
-	private Activity activity;
-
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -41,8 +38,8 @@ public class Roll3Dice extends RollDice {
 		Point size = getSize();
 		int width = size.x;
 		int height = size.y;
-		// Width will be restricted either by height or width. Dice should take max 50% of screen
-		int frameWidth = (int) Math.min(width * 0.44, height * 0.5 * 0.44); // Each dice 40%
+		// Width will be restricted either by height or width. Dice should take max 50% of screen height
+		int frameWidth = (int) Math.min(width * 0.46, height * 0.5 * 0.46); // Each dice 46%
 		// Ensure that the space between each dice is equal
 		int frameHeightMargin = (int) (height * 0.5 - frameWidth * 2) / 3; // Divide the remainder evenly
 		int frameWidthMarginOuter = (int) (width - 2 * frameWidth - frameHeightMargin) / 2; // Calculate outer
@@ -70,20 +67,17 @@ public class Roll3Dice extends RollDice {
 		int[] roll = new int[] {5, 1, 0}; // Initialize to mex
 		boolean[] vast = new boolean[3]; // false by default
 		setupDice(dies, vastImages, roll, vast);
-
-		activity = this;
 	}
-
-	protected void evaluateChances() {
-		activity.runOnUiThread(new Runnable() {
-			public void run() {
-				setChances(determineChance(getRoll(0) + 1, getVast(0), getRoll(1) + 1, getVast(1), 
-						getRoll(2) + 1, getVast(2)), 
-						determineChanceHigher(getRoll(0) + 1, getVast(0), getRoll(1) + 1, getVast(1),
-								getRoll(2) + 1, getVast(2)));
-			}
-		});
+	
+	@Override
+	protected float determineThrowChance() {
+		return determineChance(getNumber(0), getVast(0), getNumber(1), getVast(1), getNumber(2), getVast(2));
 	}
+	
+	@Override
+	protected float determineHigherChance() {
+		return determineChanceHigher(getNumber(0), getVast(0), getNumber(1), getVast(1), getNumber(2), getVast(2));
+	}	
 
 	private float determineChance(int d1, boolean v1, int d2, boolean v2, int d3, boolean v3) {
 		if (v1)
@@ -98,88 +92,101 @@ public class Roll3Dice extends RollDice {
 			return 1 / 6f / 6f / 6f * 3; // (1 / 6 / 6 / 6) * 3 
 		return 1 / 6f / 6f; // No equals (1 / 6 / 6 / 6) * 6
 	}
+	
+	private int mexVastOne(int vast, int mex) {
+		// We need to beat 21 'mex'
+		if (vast == mex) { // Mex number is held vast
+			if (vast > 2) // 12 3-6, no chance at all, because the rest is already mex
+				return 0;
+			if (vast == 2) return 8; // 122, Chance of a 1 with 3 or higher
+			return 9; // 121, Chance of 2 with 2 or higher
+		}
+		// vast == 2, we need a 1 with mex + 1 or higher
+		// vast == 1, need a 2 with mex + 1 or higher
+		// 112, 122 is already done
+		return (6 - mex) * 2;
+	}
+	
+	private int mexVastTwo(int notVast, int mex) {
+		if (notVast == mex)
+			return 6 - mex; // We have 21, so mex + 1 or higher
+		return 0; // You hold a 1 or 2 with a 3-6
+	}
 
 	/**
 	 * Determine the chance of throwing higher than the supplied dice results.
 	 * Take in account that one or two of the dice may be held 'vast'.
 	 */
 	private float determineChanceHigher(int d1, boolean v1, int d2, boolean v2, int d3, boolean v3) {
-		if (v1)
-			return determineChanceHigher(d2, v2, d3, v3);
-		else if (v2)
-			return determineChanceHigher(d1, v1, d3, v3);
-		else if (v3)
-			return determineChanceHigher(d1, v1, d2, v2);
+		// Mexes
+		int mex = isMex(d1, d2, d3); 
+		if (mex > 0) {
+			// Two vast
+			if (v1 && v2) return mexVastTwo(d3, mex) / 6f;
+			if (v2 && v3) return mexVastTwo(d1, mex) / 6f;
+			if (v1 && v3) return mexVastTwo(d2, mex) / 6f;
+			
+			// One vast
+			if (v1) return mexVastOne(d1, mex) / 36f;
+			if (v2) return mexVastOne(d2, mex) / 36f;
+			if (v3) return mexVastOne(d3, mex) / 36f;
+			
+			// Mexes 3 - 6 have 6 possible throws, 1 and 2 have 3 possible throws
+			int numThrows = 0; // Mex has nothing higher
+			if (mex == 1) {
+				numThrows += 3;
+				mex++; // We have taken in account mex 2
+			}
+			numThrows += (6 - mex) * 6; // Add for each mex 6
+			return numThrows / 216f;
+		}
 		
-		if ((d2 > d1 && !v1 && !v2) || v2) { // Switch dice without vast to highest first, vast should be first
-			int x = d2;
-			d2 = d1;
-			d1 = x;
-			boolean y = v2;
-			v2 = v1;
-			v1 = y;
-		}
-		// d1 >= d2
-		int num_throws = 0;
-		if (v1 || v2) { // vast
-			switch (d1) {
-			case 1: // 11
-				if (d2 == 1)
-					return 1 / 6f; // 21
-				if (d2 == 2 || d2 == 3) // 21, 31
-					return 0f; // no higher
-				return (6 - d2 + 2) / 6f; // EXAMPLE: d2 == 4, (11, 21, 51, 61 are higher), (6 - 4 + 2)
-			case 2:
-				if (d2 == 1) // 21
-					return 0f; // no higher
-				if (d2 == 2)
-					return 1 / 6f; // 22, so only 21
-				return (6 - d2 + 2) / 6f; // EXAMPLE: d2 == 3, (21, 22, 42, 52, 62 are higher), (6 - 3 + 2)
-			case 3:
-				if (d2 == 1)
-					return 0f; // 31, there is nothing higher!
-				if (d2 == 2) {
-					if (v1) // 3 is vast
-						return 4 / 6f; // (33, 43, 53, 63 are higher)
-					return 5 / 6f; // 2 is vast, others are higher 
-				}					
-				if (d2 == 3)
-					return 0f; // 33, highest
-				return (6 - d2 + 1) / 6f; // EXAMPLE: d2 == 4, (33, 53, 63 are higher), (6 - 4 + 1)
-			default:
-				Log.e("RollDice", String.format("The value of dice one, %d, should not be able to be vast", d1));
+		// Thousands
+		if (d1 == d2 && d2 == d3) {
+			if (v1 && v2 || v2 && v3 || v1 && v3) { // Two vast
+				if (d1 == 1 || d1 == 2)
+					return 1 / 6f; // 111 -> 112, 222 -> 221 
+				return 0f; // 3 - 6 have no chance
 			}
-		} else { // not vast
-			if (d1 == d2) // Hundreds
-				return (6 - d1 + 2) / 36f; // Count hundreds once, and add 2 for the mex
-			// d1 > d2
-			num_throws = 8; // Hundreds + mex
-			switch (d1) {
-			case 2: // 21
-				return 0f; // mex
-			case 3: // 31, 32
-				if (d2 == 1)
-					return 0f; // 31,There is nothing higher, TODO: add string
-				return 34 / 36f; // 32, everything is higher
-				// Add to the hundreds and mex
-			case 4: // 41, 42, 43
-				num_throws += 3 * 2; // Add all possibilities
-			case 5: // 51, 52, 53, 54
-				num_throws += 4 * 2; // Add all possibilities
-			case 6: // 61, 62, 63, 64, 65
-				num_throws += 5 * 2; // Add all possibilities
-				break;
-			default:
-				Log.e("RollDice", String.format("The value of dice one, %d, should not be possible", d1));
+			if (v1 || v2 || v3) { // One vast
+				if (d1 == 1 || d1 == 2)
+					return 11 / 36f; // 1 needs only a 2, 2 needs only a 1
+				return 2 / 36f; // 3 - 6 can be owned with 21
 			}
-			// EXAMPLE: d1=5, d2=2; 8 (Hundreds and mex) + 4 * 2 (51 - 54) + 5 * 2 (61 - 65) - 2 * 2 (51 - 52)
-			num_throws -= d2 * 2; // Minus the ones you beat with the same d1
+			int numThrows = 2 * 3 + 4 * 6; // Mex 1,2 and Mex 3 - 6
+			numThrows += (6 - d1); // Count each higher thousand
+			return numThrows / 216f;
 		}
-		return num_throws / 36f;
+		
+		// Hundreds
+		
+		int numThrows = 0;
+		return numThrows / 216f;
 	}
 
 	@Override
 	protected boolean isSpecialVastCase() {
-		return false;
+		return (isMex(getNumber(0), getNumber(1), getNumber(2)) == 6); // Cannot call vast on Mex 6
+	}
+	
+	/**
+	 * Determines whether it is a Mex combination
+	 * @return mex number if mex, otherwise -1
+	 */
+	private int isMex(int n1, int n2, int n3) {
+		int[] nums = new int[7];
+		nums[n1]++;
+		nums[n2]++;
+		nums[n3]++;
+		if (--nums[1] >= 0 && --nums[2] >= 0)
+			for (int i = 0; i < nums.length; i++)
+				if (nums[i] == 1)
+					return i;
+		return -1;
+	}
+
+	@Override
+	protected int getHighestVastNumber() {
+		return 6;
 	}
 }

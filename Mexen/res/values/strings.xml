@@ -14,5 +14,6 @@
     <string name="throw_higher_chance">Kans om hoger te gooien</string>
     <string name="throw_higher_chance_default">0%</string>
 	<string name="gray_overlay">gray overlay</string>
+	<string name="choose_dice">Kies het aantal dobbelstenen dat je wilt gebruiken</string>
     
 </resources>
