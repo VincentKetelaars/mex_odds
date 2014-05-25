@@ -112,7 +112,7 @@
 	        android:id="@+id/throw_chance_result_textview"
             style="@style/default_text_style"
 	        android:layout_gravity="center_horizontal"
-	        android:text="@string/throw_chance_default_3" />
+	        android:text="@string/chance_default" />
 
 	    <TextView
 	        android:id="@+id/throw_higher_chance_textview"
@@ -124,7 +124,7 @@
 	        android:id="@+id/throw_higher_chance_result_textview"
             style="@style/default_text_style"
 	        android:layout_gravity="center_horizontal"
-	        android:text="@string/throw_higher_chance_default" />
+	        android:text="@string/chance_default" />
 
     </LinearLayout>
 

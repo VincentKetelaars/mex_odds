@@ -157,6 +157,7 @@ public abstract class RollDice extends Activity {
 			d.setOnClickListener(diceListener); // Set the listener for each dice
 			d.setOnLongClickListener(vastListener); // Set the long listener for each dice
 		}
+		evaluateChances();
 	}
 	
 	protected abstract boolean isSpecialVastCase();
@@ -205,8 +206,7 @@ public abstract class RollDice extends Activity {
 	protected abstract float determineHigherChance();
 	
 	private String floatToPercentage(float x) {
-		int percentage = Math.round(x * 100);
-		return String.format(Locale.getDefault(), "%d%%", percentage);
+		return String.format(Locale.getDefault(), "%.2f%%", x * 100);
 	}
 	
 	@Override

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
@@ -62,7 +61,6 @@ public class MexGame extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.mex_2_button:
-			Log.i("MexGame", "Height " + chooseTextView.getHeight());
 			Intent intent = new Intent(this, Roll2Dice.class);
 			startActivity(intent);
 			break;

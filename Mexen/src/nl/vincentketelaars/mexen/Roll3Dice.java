@@ -112,6 +112,18 @@ public class Roll3Dice extends RollDice {
 			return 6 - mex; // We have 21, so mex + 1 or higher
 		return 0; // You hold a 1 or 2 with a 3-6
 	}
+	
+	private int hundredReduce(int numThrows, int d1, int d2, int d3, int num) {
+		if (d1 > num) {
+			if (d2 == num) {
+				numThrows -= d3 * 6; // 6x: {d1}{num}{1 - num}
+				if (d3 == num) numThrows += 3; // 3x: {d1}{num}{num}
+			} else if (d2 > num) {
+				numThrows -= (num - 1) * 6 + 3; // 6x: {d1}{num}{1 - {num-1}}, 3x: {d1}{num}{num}
+			}
+		}
+		return numThrows;
+	}
 
 	/**
 	 * Determine the chance of throwing higher than the supplied dice results.
@@ -159,8 +171,55 @@ public class Roll3Dice extends RollDice {
 		}
 		
 		// Hundreds
+		// Order the numbers from high to low, make sure the vast go with
+		int nums[] = new int[7];
+		int bools[] = new int[7];
+		nums[d1]++; nums[d2]++; nums[d3]++;
+		if (v1) bools[d1]++; if (v2) bools[d2]++;  if (v3) bools[d3]++;
+		int counter = 0;
+		for (int i = 6; i > 0; i--) {
+			if (nums[i]-- > 0) {
+				switch (counter++) {
+				case 0: d1 = i; v1 = (bools[i]-- > 0); break;
+				case 1: d2 = i; v2 = (bools[i]-- > 0); break;
+				case 2: d3 = i; v3 = (bools[i]-- > 0); break;
+				}
+				i++;
+			}
+		}
 		
-		int numThrows = 0;
+		// Two vast
+		
+		
+		// One vast
+		
+		
+		// No vast
+		int numThrows = 6 + 2 * 3 + 4 * 6; // Thousands, 21{1,2}, 21{3-6}
+		// Outer switch adds for each case
+		// d1 != 1 or 2
+		// 3x: 311 322 331 332
+		// 6x: 431 432, 3x: 411 422 433 441 442 443
+		// 6x: 531 532 541 542 543, 3x: 511 522 533 544 551 552 553 554
+		// 6x: 631 632 641 642 643 651 652 653 654, 3x: 611 622 633 644 655 661 662 663 664 665
+		int inc = 0;
+		for (int i = 3; i < 7; i++) {
+			if (d1 <= i)
+				numThrows += inc * 6 + (i - 1) * 2 * 3; // Ex 6: 9 * 6 + 10 * 3
+			inc += i - 1;
+		}
+		
+		if (d2 == 1) 
+			numThrows -= 3; // 3x: {d1}11
+		else // d2 > 1 
+			numThrows -= 6; // 3x: {d1}11 {d1}22
+		
+		for (int i = 3; i < 6; i++)
+			numThrows = hundredReduce(numThrows, d1, d2, d3, i); // reduce for lower d2
+		
+		if (d1 == d2)
+			numThrows -= d3 * 3; // {d1}{d1}{1-d3}
+		
 		return numThrows / 216f;
 	}
 
