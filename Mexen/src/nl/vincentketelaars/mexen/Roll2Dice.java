@@ -150,5 +150,10 @@ public class Roll2Dice extends RollDice {
 	@Override
 	protected int getHighestVastNumber() {
 		return 3;
+	}
+
+	@Override
+	protected int numDice() {
+		return 2;
 	}	
 }

@@ -64,11 +64,14 @@ public abstract class RollDice extends Activity {
 		// Make title bar icon clickable, and go home
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
+		setVolumeControlStream(AudioManager.STREAM_MUSIC); // User can modify music volume
 		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		soundMap = new SparseIntArray();
 		soundMap.put(R.raw.roll, soundPool.load(this, R.raw.roll, 1)); // Note: If load returns 0 it failed
 		
 		activity = this;
+		
+		getActionBar().setTitle(String.format(getResources().getString(R.string.roll_activity_name), numDice()));
 	}
 	
 	protected Point getSize() {
@@ -254,4 +257,9 @@ public abstract class RollDice extends Activity {
 	protected boolean isMex(int d1, int d2) {
 		return (d1 == 1 && d2 == 2 || d1 == 2 && d2 == 1); // 12 or 21
 	}
+	
+	/**
+	 * @return number of dice
+	 */
+	protected abstract int numDice();
 }

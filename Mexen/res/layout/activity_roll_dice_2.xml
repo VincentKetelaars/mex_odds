@@ -21,7 +21,7 @@
 	            android:id="@+id/die1"
 	            android:layout_width="match_parent"
 	            android:layout_height="match_parent"
-	            android:contentDescription="@string/dice"
+	            android:contentDescription="@string/die"
 	            android:src="@drawable/d2" />
 	        
 	        <ImageView 
@@ -44,7 +44,7 @@
 	            android:id="@+id/die2"
 	            android:layout_width="match_parent"
 	            android:layout_height="match_parent"
-	            android:contentDescription="@string/dice"
+	            android:contentDescription="@string/die"
 	            android:src="@drawable/d1" />
 	        
 	        <ImageView 

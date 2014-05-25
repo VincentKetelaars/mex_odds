@@ -71,4 +71,8 @@ public class MexGame extends Activity implements OnClickListener {
 		}
 	}
 
+	public void onResume() {
+		super.onResume();
+		getActionBar().setTitle(getResources().getString(R.string.app_name));
+	}
 }
