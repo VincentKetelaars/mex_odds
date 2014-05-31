@@ -256,7 +256,15 @@ public class Roll3Dice extends RollDice {
 		int numThrows = 0;
 		// Two vast
 		if (v1 && v2) {
-			
+			// Higher is always better
+			numThrows += 6 - d3; //{d1}{d2}{{d3+1}-6}
+			// Not already counted
+			if (d1 == 2 || d2 == 2) // d3 >= 2
+				numThrows++; // 1 is mex
+			if (d1 == 1 || d2 == 1 && d3 >= 3)
+				numThrows++; // 2 is mex
+			if (d1 == d2 && d3 > d1) // Thousands
+				numThrows++;
 			return numThrows / 6f;
 		}
 		
