@@ -18,6 +18,7 @@ package nl.vincentketelaars.mexen;
 
 import android.graphics.Point;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -92,6 +93,28 @@ public class Roll3Dice extends RollDice {
 		return 1 / 6f / 6f; // No equals (1 / 6 / 6 / 6) * 6
 	}
 	
+	/**
+	 * Determines whether it is a Mex combination
+	 * @return mex number if mex, otherwise -1
+	 */
+	private int isMex(int n1, int n2, int n3) {
+		int[] nums = new int[7];
+		nums[n1]++;
+		nums[n2]++;
+		nums[n3]++;
+		if (--nums[1] >= 0 && --nums[2] >= 0)
+			for (int i = 0; i < nums.length; i++)
+				if (nums[i] == 1)
+					return i;
+		return -1;
+	}
+	
+	/**
+	 * Determine the number of higher throws with one vast die and the mex number available
+	 * @param vast: Vast number
+	 * @param mex: Current mex number
+	 * @return number of higher throws
+	 */
 	private int mexVastOne(int vast, int mex) {
 		// We need to beat 21 'mex'
 		if (vast == mex) { // Mex number is held vast
@@ -106,12 +129,30 @@ public class Roll3Dice extends RollDice {
 		return (6 - mex) * 2;
 	}
 	
+	/**
+	 * Two dice are vast, determine the number of higher possible throws.
+	 * @param notVast: Die that is free
+	 * @param mex: The current mex number
+	 * @return number of higher throws
+	 */
 	private int mexVastTwo(int notVast, int mex) {
 		if (notVast == mex)
 			return 6 - mex; // We have 21, so mex + 1 or higher
 		return 0; // You hold a 1 or 2 with a 3-6
 	}
 	
+	/**
+	 * Decrease numThrows with throws for die combinations that are lower than the current throw
+	 * Only remove those where d2 == num
+	 * The dice numbers are ordered from high to low, for d1 through d3 respectively.
+	 * EXAMPLE: 
+	 * @param numThrows
+	 * @param d1: Highest die number
+	 * @param d2: Middle die number
+	 * @param d3: Lowest die number
+	 * @param num: Which level we are looking (3 - 5)
+	 * @return numThrows
+	 */
 	private int hundredReduce(int numThrows, int d1, int d2, int d3, int num) {
 		if (d1 > num) {
 			if (d2 == num) {
@@ -121,6 +162,21 @@ public class Roll3Dice extends RollDice {
 				numThrows -= (num - 1) * 6 + 3; // 6x: {d1}{num}{1 - {num-1}}, 3x: {d1}{num}{num}
 			}
 		}
+		return numThrows;
+	}
+	
+	private int nonMexVastOne(int v, int d2, int d3) {
+		int numThrows = 2 * 1 + 5 * 2; // 1x: {v}{v}{v} 12{v}, 2x: 121 123 124 125 126
+		for (int i = 3; i < 7; i++) {
+			if (d2 <= i)
+				numThrows += 1 + (i - 2) * 2; // {d2}{d2}{v} {d2}{v}{v} {d2}{3-{d2-1}}{v}
+		}
+		if (d3 == v) // {d2}{v}{v}
+			numThrows -= 2; 
+		else if (d3 < d2) // {d2}{d3}{v}
+			numThrows -= (d3 - 1) * 2; // {d2}{v}{v} {d2}{3-{d2-1}}{v}
+		else // {d2}{d2}{v}
+			numThrows -= 1 + (d2 - 2) * 2; 
 		return numThrows;
 	}
 
@@ -170,15 +226,25 @@ public class Roll3Dice extends RollDice {
 		}
 		
 		// Hundreds
-		// Order the numbers from high to low, make sure the vast go with
+		// Order the numbers from first vast, then high to low
+		// make sure the vast correspond to the numbers
 		int nums[] = new int[7];
 		int bools[] = new int[7];
 		nums[d1]++; nums[d2]++; nums[d3]++;
 		if (v1) bools[d1]++; if (v2) bools[d2]++;  if (v3) bools[d3]++;
 		int counter = 0;
 		for (int i = 6; i > 0; i--) {
+			if (bools[i]-- > 0) { // Get the vast first
+				switch (counter++) { // if bools[i] > 0 then nums[i] > 0
+				case 0: d1 = i; v1 = (nums[i]-- > 0); break;
+				case 1: d2 = i; v2 = (nums[i]-- > 0); break;
+				}
+				i++;
+			}
+		}
+		for (int i = 6; i > 0; i--) {
 			if (nums[i]-- > 0) {
-				switch (counter++) {
+				switch (counter++) { // Get the nums
 				case 0: d1 = i; v1 = (bools[i]-- > 0); break;
 				case 1: d2 = i; v2 = (bools[i]-- > 0); break;
 				case 2: d3 = i; v3 = (bools[i]-- > 0); break;
@@ -187,16 +253,43 @@ public class Roll3Dice extends RollDice {
 			}
 		}
 		
+		int numThrows = 0;
 		// Two vast
-		
+		if (v1 && v2) {
+			
+			return numThrows / 6f;
+		}
 		
 		// One vast
-		
+		if (v1) {
+			if (d1 <= 2) // d1 == 1 or d1 == 2
+				// 3{d1}{d1} 33{d1} 4{d1}{d1} 43{d1} 44{d1} 5{d1}{d1} 53{d1} 54{d1} 55{d1} 
+				// 6{d1}{d1} 63{d1} 64{d1} 65{d1} 66{d1}
+				return nonMexVastOne(d1, d2, d3) / 36f;
+			numThrows = 1 + 2; // {d1}{d1}{d1} 21{d1}
+			// 311 322 331 332 431 432 433 443 531 532 533 543 553 631 632 633 643 653 663
+			// 411 422 431 432 433 441 442 443 541 542 543 544 554 641 642 643 644 654 664 
+			// 511 522 531 532 533 541 542 543 544 551 552 553 554 651 652 653 654 655 665
+			// 611 622 631 632 633 641 642 643 644 651 652 653 654 655 661 662 663 664 665 
+			for (int i = d2; i < 7; i++) {
+				numThrows += (i - 1) * 2; // 2x: {d1}{i}{1-{i-1}}
+				if (d1 != i)
+					numThrows += 1; // 1x: {d}{i}{i}
+			}
+			if (d2 <= 2) {
+				numThrows += 2 - d2; // {d1}11 {d1}22
+			} else {
+				numThrows -= d3 * 2; // {d1}{d2}{1-{d3}}
+				if (d2 == d3)
+					numThrows++; // Compensate for d3 * 2
+			}
+			return numThrows / 36f;
+		}
 		
 		// No vast
-		int numThrows = 6 + 2 * 3 + 4 * 6; // Thousands, 21{1,2}, 21{3-6}
-		// Outer switch adds for each case
+		numThrows = 6 + 2 * 3 + 4 * 6; // Thousands, 21{1,2}, 21{3-6}
 		// d1 != 1 or 2
+		
 		// 3x: 311 322 331 332
 		// 6x: 431 432, 3x: 411 422 433 441 442 443
 		// 6x: 531 532 541 542 543, 3x: 511 522 533 544 551 552 553 554
@@ -225,22 +318,6 @@ public class Roll3Dice extends RollDice {
 	@Override
 	protected boolean isSpecialVastCase() {
 		return (isMex(getNumber(0), getNumber(1), getNumber(2)) == 6); // Cannot call vast on Mex 6
-	}
-	
-	/**
-	 * Determines whether it is a Mex combination
-	 * @return mex number if mex, otherwise -1
-	 */
-	private int isMex(int n1, int n2, int n3) {
-		int[] nums = new int[7];
-		nums[n1]++;
-		nums[n2]++;
-		nums[n3]++;
-		if (--nums[1] >= 0 && --nums[2] >= 0)
-			for (int i = 0; i < nums.length; i++)
-				if (nums[i] == 1)
-					return i;
-		return -1;
 	}
 
 	@Override
