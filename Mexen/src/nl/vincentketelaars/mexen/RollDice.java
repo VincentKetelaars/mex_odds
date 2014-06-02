@@ -52,7 +52,7 @@ public abstract class RollDice extends Activity {
 	private Handler animationHandler;
 	private TextView chanceTextView;
 	private TextView higherChanceTextView;
-	private Button throw_button;
+	protected Button throw_button;
 	private SoundPool soundPool;
 	private SparseIntArray soundMap;
 
@@ -90,6 +90,7 @@ public abstract class RollDice extends Activity {
 			@Override
 			public void onClick(View v) {
 				rollDice();
+				afterRollDice();
 			}
 		});
 	}
@@ -262,4 +263,9 @@ public abstract class RollDice extends Activity {
 	 * @return number of dice
 	 */
 	protected abstract int numDice();
+	
+	/**
+	 * Is called after the dice is rolled
+	 */
+	protected abstract void afterRollDice();
 }

@@ -337,4 +337,10 @@ public class Roll3Dice extends RollDice {
 	protected int numDice() {
 		return 3;
 	}
+
+	@Override
+	protected void afterRollDice() {
+		// TODO Auto-generated method stub
+		
+	}
 }

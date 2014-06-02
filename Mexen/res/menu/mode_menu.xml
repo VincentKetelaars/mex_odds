@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >  
+
+    <item  
+        android:id="@+id/menu_mode_free"  
+        android:title="@string/game_free" />
+
+    <item  
+        android:id="@+id/menu_mode_player"  
+        android:title="@string/game_player" />
+
+</menu>  

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Mexen</string>
+    <string name="roll_activity_name">%d Dice</string>
+    <string name="mexen_2_dice">2 Dice</string>
+    <string name="mexen_3_dice">3 Dice</string>
+    <string name="action_settings">Settings</string>
+    <string name="throw_dice">Throw!</string>
+    <string name="die">Die</string>
+    <string name="throw_chance">Odds of throwing this</string>
+    <string name="throw_higher_chance">Odds of throwing higher</string>
+    <string name="chance_default">0%</string>
+	<string name="gray_overlay">gray overlay</string>
+	<string name="choose_dice">Choose the number of dice to use</string>
+    <string name="game_mode">Game mode</string>
+    <string name="game_free">Free throw</string>
+    <string name="game_player">Player mode</string>
+    <string name="throw_one">First throw</string>
+    <string name="throw_two">Second throw</string>
+    <string name="throw_three">Third throw</string>
+    <string name="throw_again">Throw again</string>
+</resources>

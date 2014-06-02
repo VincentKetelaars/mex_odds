@@ -19,11 +19,22 @@ package nl.vincentketelaars.mexen;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.PopupMenu.OnMenuItemClickListener;
 
-public class Roll2Dice extends RollDice {
+public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
+	
+	private enum GameMode { FREEPLAY, PLAYER }
+//	private HashMap<GameMode, String> gameModi;
+	private GameMode currentMode = GameMode.FREEPLAY;
+	private int currentThrows = 0;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -31,6 +42,10 @@ public class Roll2Dice extends RollDice {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_roll_dice_2);
 		setupViews();
+		
+//		gameModi = new HashMap<GameMode, String>();
+//		gameModi.put(GameMode.FREEPLAY, getResources().getString(R.string.game_free));
+//		gameModi.put(GameMode.PLAYER, getResources().getString(R.string.game_player));
 		
 		FrameLayout[] frames = new FrameLayout[] {(FrameLayout) findViewById(R.id.die_frame_1),
 				(FrameLayout) findViewById(R.id.die_frame_2)};
@@ -155,5 +170,76 @@ public class Roll2Dice extends RollDice {
 	@Override
 	protected int numDice() {
 		return 2;
-	}	
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.roll2_menu, menu);
+	    return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection
+	    switch (item.getItemId()) {
+	        case R.id.game_mode:
+	        	showPopup(findViewById(R.id.game_mode));
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
+	
+	private void showPopup(View v) {
+		if (v == null)
+			return;
+	    PopupMenu popup = new PopupMenu(this, v);
+	    popup.setOnMenuItemClickListener(this);
+	    popup.inflate(R.menu.mode_menu);
+	    popup.show();
+	}
+
+	@Override
+	public boolean onMenuItemClick(MenuItem item) {
+		switch(item.getItemId()) {
+		case R.id.menu_mode_free:
+			currentMode = GameMode.FREEPLAY;
+			break;
+		case R.id.menu_mode_player:
+			currentMode = GameMode.PLAYER;
+			break;
+		default:
+			Log.i("Roll2Dice", "OnMenuItemClick, no recognized item!");
+			return false;
+		}
+		updateView();
+		return true;
+	}
+	
+	/**
+	 * Update the entire view
+	 * GameMode changes assume to start over
+	 */
+	private void updateView() {
+		if (currentMode == GameMode.FREEPLAY) {
+			super.throw_button.setText(getResources().getString(R.string.throw_dice));
+			currentThrows = -1;
+		} else if (currentMode == GameMode.PLAYER) {
+			super.throw_button.setText(getResources().getString(R.string.throw_one));
+			currentThrows = 0;
+		}
+	}
+
+	@Override
+	protected void afterRollDice() {
+		if (currentThrows < 0)
+			return;
+		
+		
+		
+		currentThrows++;
+	}
+	
+	
 }
