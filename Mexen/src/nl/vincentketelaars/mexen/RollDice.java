@@ -90,7 +90,6 @@ public abstract class RollDice extends Activity {
 			@Override
 			public void onClick(View v) {
 				rollDice();
-				afterRollDice();
 			}
 		});
 	}
@@ -140,15 +139,13 @@ public abstract class RollDice extends Activity {
 				for (int i = 0; i  < dies.length; i++) {
 					if (dies[i].getId() == view.getId()) {
 						if (vastImages[i].getVisibility() == View.VISIBLE) {
-							vastImages[i].setVisibility(View.INVISIBLE);
-							vast[i] = false;
+							setUnvast(i);
 							break;
 						}
 						if (isSpecialVastCase()) break;
 						if (vastImages[i].getVisibility() == View.INVISIBLE && numVast < dies.length - 1 &&
 							roll[i] < getHighestVastNumber()) { // Only vast on 1, 2 or 3
-							vastImages[i].setVisibility(View.VISIBLE);
-							vast[i] = true;
+							setVast(i);
 						}
 					}
 				}
@@ -174,6 +171,7 @@ public abstract class RollDice extends Activity {
 					doRoll();					
 				}
 				evaluateChances();
+				afterRollDice();
 			}
 		}).start();
 		soundPool.play(soundMap.get(R.raw.roll), 1f, 1f, 0, 0, 1f); // Play once at current volume
@@ -259,6 +257,14 @@ public abstract class RollDice extends Activity {
 		return (d1 == 1 && d2 == 2 || d1 == 2 && d2 == 1); // 12 or 21
 	}
 	
+	protected boolean isLow(int d1, int d2) {
+		return (d1 == 3 && d2 == 2 || d1 == 2 && d2 == 3); // 32 or 23
+	}
+	
+	protected boolean isPoint(int d1, int d2) {
+		return (d1 == 3 && d2 == 1 || d1 == 1 && d2 == 3); // 31 or 13
+	}
+	
 	/**
 	 * @return number of dice
 	 */
@@ -268,4 +274,39 @@ public abstract class RollDice extends Activity {
 	 * Is called after the dice is rolled
 	 */
 	protected abstract void afterRollDice();
+	
+	/**
+	 * Remove vast from die
+	 * @param i
+	 */
+	protected void setUnvast(final int i) {
+		vastImages[i].post(new Runnable() {
+		    public void run() {
+				vastImages[i].setVisibility(View.INVISIBLE);
+				vast[i] = false;
+		    } 
+		});
+	}
+	
+	/**
+	 * Set die vast
+	 * @param i
+	 */
+	protected void setVast(final int i) {
+		vastImages[i].post(new Runnable() {
+		    public void run() {
+				vastImages[i].setVisibility(View.VISIBLE);
+				vast[i] = true;
+		    } 
+		});
+	}
+	
+	protected void setThrowButtonLabel(final int labelString) {
+		throw_button.post(new Runnable() {
+		    public void run() {
+				String label = getResources().getString(labelString);
+				throw_button.setText(label);
+		    } 
+		});
+	}
 }

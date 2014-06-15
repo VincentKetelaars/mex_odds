@@ -34,7 +34,8 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 	private enum GameMode { FREEPLAY, PLAYER }
 //	private HashMap<GameMode, String> gameModi;
 	private GameMode currentMode = GameMode.FREEPLAY;
-	private int currentThrows = 0;
+	private int currentThrows = -1;
+	private int defaultVastHighestNumber = 3;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -235,11 +236,55 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 	protected void afterRollDice() {
 		if (currentThrows < 0)
 			return;
-		
-		
-		
+		boolean v0 = getVast(0);
+		boolean v1 = getVast(1);
+		setUnvast(0);
+		setUnvast(1);
+		if (currentThrows < 2) {
+			if (v0 || v1) {
+				updateVastAlready(v0 ? 0 : 1);
+			} else {
+				updateVastAlready(-1);				
+			}
+		}
+		if (isMex(getNumber(0), getNumber(1)) || isLow(getNumber(0), getNumber(1))) {
+			currentThrows = -1; // Becomes zero later
+		}
+		if (isPoint(getNumber(0), getNumber(1))) {
+			setUnvast(0);
+			setUnvast(1);
+			currentThrows--; // Becomes the same later
+		}			
 		currentThrows++;
+		if (currentThrows > 2)
+			currentThrows = 0;
+		setThrowLabel();
 	}
 	
+	private void updateVastAlready(int already) {
+		for (int i = 0; i < numDice(); i++) {
+			if (already != i) {
+				if ( getNumber(i) <= defaultVastHighestNumber) {
+					setVast(i);
+					break;
+				}
+			}
+		}
+	}
 	
+	private void setThrowLabel() {
+		switch(currentThrows) {
+		case 0:
+			setThrowButtonLabel(R.string.throw_one);
+			break;
+		case 1:
+			setThrowButtonLabel(R.string.throw_two);
+			break;
+		case 2:
+			setThrowButtonLabel(R.string.throw_three);
+			break;
+		default:
+			setThrowButtonLabel(R.string.throw_again);
+		}
+	}
 }
