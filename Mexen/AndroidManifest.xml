@@ -16,7 +16,8 @@
         
         <activity
             android:name="nl.vincentketelaars.mexen.MexGame"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="sensorPortrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,7 +28,8 @@
         <activity
             android:name="nl.vincentketelaars.mexen.Roll2Dice"
             android:label="@string/app_name"
-            android:parentActivityName="nl.vincentketelaars.mexen.MexGame" >
+            android:parentActivityName="nl.vincentketelaars.mexen.MexGame"
+            android:screenOrientation="sensorPortrait"  >
             <!-- Older than API 16 -->
             <meta-data
             	android:name="android.support.PARENT_ACTIVITY"
@@ -37,7 +39,8 @@
         <activity
             android:name="nl.vincentketelaars.mexen.Roll3Dice"
             android:label="@string/app_name"
-            android:parentActivityName="nl.vincentketelaars.mexen.MexGame" >
+            android:parentActivityName="nl.vincentketelaars.mexen.MexGame"
+            android:screenOrientation="sensorPortrait"  >
             <!-- Older than API 16 -->
             <meta-data
             	android:name="android.support.PARENT_ACTIVITY"
