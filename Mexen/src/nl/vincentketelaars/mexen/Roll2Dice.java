@@ -25,6 +25,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -55,6 +57,15 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 		previousTurnsView = (HorizontalListView) findViewById(R.id.previous_throws_scroll_view);
 		throwsAdapter = new TwoDiceVerticleAdapter(this, new ArrayList<Throw>());
 		previousTurnsView.setAdapter(throwsAdapter);
+		previousTurnsView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				Throw t = throwsAdapter.getItem(position);
+				setDie(0, t.getNumberOne());
+				setDie(1, t.getNumberTwo());
+			}
+		});
 
 		Point size = getSize();
 		int width = size.x;
@@ -325,7 +336,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 		});
 	}
 	
-	protected boolean iterateDiceAllowed() {
+	protected boolean changeDiceValueAllowed() {
 		return currentMode != GameMode.PLAYER;
 	}
 

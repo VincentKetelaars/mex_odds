@@ -3,12 +3,10 @@ package nl.vincentketelaars.mexen;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -24,7 +22,6 @@ public class TwoDiceVerticleAdapter extends BaseAdapter {
  
 	public View getView(int position, View convertView, ViewGroup parent) { 
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		Log.i("TwoDice", String.format("%s %d %d %d", convertView, position, getItem(position).getNumberOne(), getItem(position).getNumberTwo()));
 		if (convertView == null) { 			
 			convertView = inflater.inflate(R.layout.vertical_dice, parent, false);
 			Throw previous = getItem(position);
@@ -70,7 +67,6 @@ public class TwoDiceVerticleAdapter extends BaseAdapter {
 	public void addThrow(Throw t) {
 		previousThrows.add(t);
 		this.notifyDataSetChanged();
-		Log.i("TwoDice", previousThrows.toString());
 	}
 	
 	public void clearThrows() {

@@ -118,7 +118,7 @@ public abstract class RollDice extends Activity {
 		OnClickListener diceListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (!iterateDiceAllowed())
+				if (!changeDiceValueAllowed())
 					return;
 				for (int i = 0; i  < dies.length; i++) {
 					if (dies[i].getId() == v.getId() && !vast[i]) {
@@ -312,7 +312,16 @@ public abstract class RollDice extends Activity {
 		});
 	}
 	
-	protected boolean iterateDiceAllowed() {
+	protected boolean changeDiceValueAllowed() {
+		return true;
+	}
+	
+	protected boolean setDie(int position, int number) {
+		if (position >= roll.length || !changeDiceValueAllowed())
+			return false;
+		roll[position] = number - 1;
+		animationHandler.sendEmptyMessage(0);
+		evaluateChances();
 		return true;
 	}
 }
