@@ -20,4 +20,6 @@
     <string name="throw_two">Tweede gooi</string>
     <string name="throw_three">Derde gooi</string>
     <string name="throw_again">Gooi opnieuw</string>
+    <string name="share">Deel</string>
+    <string name="share_string">Ik ben erg tevreden met de Mex Kansen app. Jij kan hem ook downloaden op https://play.google.com/store/apps/details?id=nl.vincentketelaars.mexen</string>
 </resources>

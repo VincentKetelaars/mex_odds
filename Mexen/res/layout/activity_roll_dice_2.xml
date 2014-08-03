@@ -3,9 +3,13 @@
     android:id="@+id/dice_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical" >
-
+    
+    <nl.vincentketelaars.mexen.HorizontalListView 
+        android:id="@+id/previous_throws_scroll_view"
+        android:layout_width="match_parent"
+	    android:layout_height="wrap_content" />
+    
     <LinearLayout
         android:id="@+id/linear_image_layout"
         android:layout_width="match_parent"

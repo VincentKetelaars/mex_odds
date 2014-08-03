@@ -16,6 +16,8 @@
 
 package nl.vincentketelaars.mexen;
 
+import java.util.ArrayList;
+
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,35 +32,49 @@ import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 
 public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
-	
+
 	private enum GameMode { FREEPLAY, PLAYER }
-//	private HashMap<GameMode, String> gameModi;
 	private GameMode currentMode = GameMode.FREEPLAY;
 	private int currentThrows = -1;
 	private int defaultVastHighestNumber = 3;
-	
+	private HorizontalListView previousTurnsView;
+	private TwoDiceVerticleAdapter throwsAdapter;
+	private ArrayList<Turn> turns;
+	private ArrayList<Throw> currentTurn;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_roll_dice_2);
 		setupViews();
-		
-//		gameModi = new HashMap<GameMode, String>();
-//		gameModi.put(GameMode.FREEPLAY, getResources().getString(R.string.game_free));
-//		gameModi.put(GameMode.PLAYER, getResources().getString(R.string.game_player));
-		
-		FrameLayout[] frames = new FrameLayout[] {(FrameLayout) findViewById(R.id.die_frame_1),
-				(FrameLayout) findViewById(R.id.die_frame_2)};
+
+		turns = new ArrayList<Turn>();
+		currentTurn = new ArrayList<Throw>();
+
+		previousTurnsView = (HorizontalListView) findViewById(R.id.previous_throws_scroll_view);
+		throwsAdapter = new TwoDiceVerticleAdapter(this, new ArrayList<Throw>());
+		previousTurnsView.setAdapter(throwsAdapter);
+
 		Point size = getSize();
 		int width = size.x;
 		int height = size.y;
+
+		LinearLayout.LayoutParams gridViewParams = (LinearLayout.LayoutParams) previousTurnsView.getLayoutParams();
+		int diceHistoryHeight = height / 8;
+		gridViewParams.height = diceHistoryHeight;
+		previousTurnsView.setLayoutParams(gridViewParams);
+
+		height = height - diceHistoryHeight;
+
+		FrameLayout[] frames = new FrameLayout[] {(FrameLayout) findViewById(R.id.die_frame_1),
+				(FrameLayout) findViewById(R.id.die_frame_2)};
 		LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) frames[0].getLayoutParams();
 		int frameWidth = (int) (width * 0.4); // Each dice 40%
 		params.width = frameWidth;
 		params.height = frameWidth; // Square, so width equals height
 		int frameWidthMargin = (int) (width * 0.05);
-		int frameHeightMargin = (int) (height / 2 - frameWidth) / 2; // Evenly divide the upper half
+		int frameHeightMargin = (int) (height / 2 - frameWidth) / 4; // Evenly divide the upper half
 		params.setMargins(frameWidthMargin, frameHeightMargin, frameWidthMargin, frameHeightMargin);
 		for (FrameLayout f : frames) {
 			f.setLayoutParams(params);
@@ -77,12 +93,12 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 	protected float determineThrowChance() {
 		return determineChance(getNumber(0), getVast(0), getNumber(1), getVast(1));
 	}
-	
+
 	@Override
 	protected float determineHigherChance() {
 		return determineChanceHigher(getNumber(0), getVast(0), getNumber(1), getVast(1));
 	}	
-	
+
 	/**
 	 * Determine the chance of throwing higher than the supplied dice results.
 	 * Take in account that one of the dice may be held 'vast'.
@@ -140,7 +156,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 				if (d2 == 1)
 					return 0f; // 31,There is nothing higher, TODO: add string
 				return 34 / 36f; // 32, everything is higher
-			// Add to the hundreds and mex
+				// Add to the hundreds and mex
 			case 4: // 41, 42, 43
 				num_throws += 3 * 2; // Add all possibilities
 			case 5: // 51, 52, 53, 54
@@ -172,33 +188,33 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 	protected int numDice() {
 		return 2;
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.roll2_menu, menu);
-	    return true;
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.roll2_menu, menu);
+		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    // Handle item selection
-	    switch (item.getItemId()) {
-	        case R.id.game_mode:
-	        	showPopup(findViewById(R.id.game_mode));
-	            return true;
-	        default:
-	            return super.onOptionsItemSelected(item);
-	    }
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.game_mode:
+			showPopup(findViewById(R.id.game_mode));
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
-	
+
 	private void showPopup(View v) {
 		if (v == null)
 			return;
-	    PopupMenu popup = new PopupMenu(this, v);
-	    popup.setOnMenuItemClickListener(this);
-	    popup.inflate(R.menu.mode_menu);
-	    popup.show();
+		PopupMenu popup = new PopupMenu(this, v);
+		popup.setOnMenuItemClickListener(this);
+		popup.inflate(R.menu.mode_menu);
+		popup.show();
 	}
 
 	@Override
@@ -206,9 +222,11 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 		switch(item.getItemId()) {
 		case R.id.menu_mode_free:
 			currentMode = GameMode.FREEPLAY;
+			resetPlay();
 			break;
 		case R.id.menu_mode_player:
 			currentMode = GameMode.PLAYER;
+			resetPlay();
 			break;
 		default:
 			Log.i("Roll2Dice", "OnMenuItemClick, no recognized item!");
@@ -217,7 +235,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 		updateView();
 		return true;
 	}
-	
+
 	/**
 	 * Update the entire view
 	 * GameMode changes assume to start over
@@ -234,33 +252,44 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 
 	@Override
 	protected void afterRollDice() {
-		if (currentThrows < 0)
-			return;
-		boolean v0 = getVast(0);
-		boolean v1 = getVast(1);
-		setUnvast(0);
-		setUnvast(1);
-		if (currentThrows < 2) {
-			if (v0 || v1) {
-				updateVastAlready(v0 ? 0 : 1);
-			} else {
-				updateVastAlready(-1);				
-			}
-		}
-		if (isMex(getNumber(0), getNumber(1)) || isLow(getNumber(0), getNumber(1))) {
-			currentThrows = -1; // Becomes zero later
-		}
-		if (isPoint(getNumber(0), getNumber(1))) {
+		currentTurn.add(new Throw(getNumber(0), getNumber(1)));
+		switch(currentMode) {
+		case FREEPLAY:
+			addDiceToPrevious(currentTurn.get(currentTurn.size() - 1));
+			break;
+		case PLAYER:
+			boolean v0 = getVast(0);
+			boolean v1 = getVast(1);
 			setUnvast(0);
 			setUnvast(1);
-			currentThrows--; // Becomes the same later
-		}			
-		currentThrows++;
-		if (currentThrows > 2)
-			currentThrows = 0;
-		setThrowLabel();
+			if (isMex(getNumber(0), getNumber(1)) || isLow(getNumber(0), getNumber(1))) {
+				currentThrows = -1; // Becomes zero later
+			} else if (isPoint(getNumber(0), getNumber(1))) {
+				currentThrows--; // Becomes the same later
+			} else if (currentThrows < 2) { // Throw is added later, so 2 instead of 3
+				if (v0 || v1) {
+					updateVastAlready(v0 ? 0 : 1);
+				} else {
+					updateVastAlready(-1);			
+				}
+			}
+			currentThrows++;
+			if (currentThrows > 2)
+				currentThrows = 0;
+			if (currentThrows == 0 && !isPoint(getNumber(0), getNumber(1)))
+				turnFinished();
+			setThrowLabel();
+			break;			
+		}
 	}
-	
+
+	private void turnFinished() {
+		Turn t = new Turn(currentTurn);
+		turns.add(t);
+		addDiceToPrevious(t.finalThrow());
+		currentTurn = new ArrayList<Throw>();
+	}
+
 	private void updateVastAlready(int already) {
 		for (int i = 0; i < numDice(); i++) {
 			if (already != i) {
@@ -271,7 +300,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 			}
 		}
 	}
-	
+
 	private void setThrowLabel() {
 		switch(currentThrows) {
 		case 0:
@@ -286,5 +315,21 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 		default:
 			setThrowButtonLabel(R.string.throw_again);
 		}
+	}
+
+	private void addDiceToPrevious(final Throw t) {
+		previousTurnsView.post(new Runnable() {
+			public void run() {
+				throwsAdapter.addThrow(t);
+			} 
+		});
+	}
+	
+	protected boolean iterateDiceAllowed() {
+		return currentMode != GameMode.PLAYER;
+	}
+
+	private void resetPlay() {
+		throwsAdapter.clearThrows();
 	}
 }

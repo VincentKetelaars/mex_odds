@@ -118,6 +118,8 @@ public abstract class RollDice extends Activity {
 		OnClickListener diceListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				if (!iterateDiceAllowed())
+					return;
 				for (int i = 0; i  < dies.length; i++) {
 					if (dies[i].getId() == v.getId() && !vast[i]) {
 						roll[i] = (roll[i] + 1) % diceImages.length;
@@ -308,5 +310,9 @@ public abstract class RollDice extends Activity {
 				throw_button.setText(label);
 		    } 
 		});
+	}
+	
+	protected boolean iterateDiceAllowed() {
+		return true;
 	}
 }

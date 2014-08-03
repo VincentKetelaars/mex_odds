@@ -6,11 +6,14 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
 public class MexGame extends Activity implements OnClickListener {
@@ -18,6 +21,7 @@ public class MexGame extends Activity implements OnClickListener {
 	ImageView mexButton; 
 	ImageView blindMexButton;
 	private TextView chooseTextView;
+	private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,5 +78,19 @@ public class MexGame extends Activity implements OnClickListener {
 	public void onResume() {
 		super.onResume();
 		getActionBar().setTitle(getResources().getString(R.string.app_name));
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    getMenuInflater().inflate(R.menu.main_menu, menu);
+	    MenuItem item = menu.findItem(R.id.menu_item_share);
+	    mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+	    Intent shareIntent = new Intent();
+	    shareIntent.setAction(Intent.ACTION_SEND);
+	    shareIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.share_string));
+	    shareIntent.setType("text/plain");
+	    if (mShareActionProvider != null)
+	        mShareActionProvider.setShareIntent(shareIntent);
+	    return true;
 	}
 }

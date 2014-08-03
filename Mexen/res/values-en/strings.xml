@@ -20,4 +20,6 @@
     <string name="throw_two">Second throw</string>
     <string name="throw_three">Third throw</string>
     <string name="throw_again">Throw again</string>
+    <string name="share">Share</string>
+    <string name="share_string">I am very happy with the MexicoOdds app. You can download it as well at https://play.google.com/store/apps/details?id=nl.vincentketelaars.mexen</string>
 </resources>
