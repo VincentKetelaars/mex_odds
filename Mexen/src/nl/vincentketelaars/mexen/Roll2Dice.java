@@ -153,7 +153,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 					return 0f; // 33, highest
 				return (6 - d2 + 1) / 6f; // EXAMPLE: d2 == 4, (33, 53, 63 are higher), (6 - 4 + 1)
 			default:
-				Log.e("RollDice", String.format("The value of dice one, %d, should not be able to be vast", d1));
+				Log.e("RollDice", String.format("The value of dice one, %d, should not be able to be vast (%b). Die two is %d and vast is %b", d1, v1, d2, v2));
 			}
 		} else { // not vast
 			if (d1 == d2) // Hundreds
