@@ -83,14 +83,18 @@ public class MexGame extends Activity implements OnClickListener {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	    getMenuInflater().inflate(R.menu.main_menu, menu);
-	    MenuItem item = menu.findItem(R.id.menu_item_share);
-	    mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+	    MenuItem shareItem = menu.findItem(R.id.menu_item_share);
+	    mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
 	    Intent shareIntent = new Intent();
 	    shareIntent.setAction(Intent.ACTION_SEND);
 	    shareIntent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.share_string));
 	    shareIntent.setType("text/plain");
 	    if (mShareActionProvider != null)
 	        mShareActionProvider.setShareIntent(shareIntent);
+	    
+	    MenuItem descriptionItem = menu.findItem(R.id.menu_item_description);
+	    Intent descriptionIntent = new Intent(this, Description.class);
+	    descriptionItem.setIntent(descriptionIntent);
 	    return true;
 	}
 }

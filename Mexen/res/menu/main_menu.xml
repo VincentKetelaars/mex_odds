@@ -1,8 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <item
+        android:id="@+id/menu_item_description"
+        android:showAsAction="ifRoom"
+        android:title="@string/description"
+        android:icon="@drawable/information" />
+    
     <item
         android:id="@+id/menu_item_share"
         android:showAsAction="ifRoom"
         android:title="@string/share"
-        android:actionProviderClass=
-            "android.widget.ShareActionProvider" />    
+        android:actionProviderClass="android.widget.ShareActionProvider" />
+
 </menu>

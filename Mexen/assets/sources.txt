@@ -1,2 +1,4 @@
 icon_person.png:
 http://www.leidselan.nl/wp-content/uploads/Icon-Person.png
+http://openclipart.org/image/800px/svg_to_png/180893/export_3.png
+http://hydra-media.cursecdn.com/wowpedia.org/thumb/b/bd/Icon-information.svg/256px-Icon-information.svg.png?version=84087a4d3aa38be92d6aeaeb50fbe2af

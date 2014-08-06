@@ -11,8 +11,8 @@
     <string name="throw_chance">Kans om dit te gooien</string>
     <string name="throw_higher_chance">Kans om hoger te gooien</string>
     <string name="chance_default">0%</string>
-	<string name="gray_overlay">grijze bovenlaag</string>
-	<string name="choose_dice">Kies het aantal dobbelstenen dat je wilt gebruiken</string>
+    <string name="gray_overlay">grijze bovenlaag</string>
+    <string name="choose_dice">Kies het aantal dobbelstenen dat je wilt gebruiken</string>
     <string name="game_mode">Spelmodus</string>
     <string name="game_free">Vrij gooien</string>
     <string name="game_player">Speler modus</string>
@@ -22,4 +22,6 @@
     <string name="throw_again">Gooi opnieuw</string>
     <string name="share">Deel</string>
     <string name="share_string">Ik ben erg tevreden met de Mex Kansen app. Jij kan hem ook downloaden op https://play.google.com/store/apps/details?id=nl.vincentketelaars.mexen</string>
+    <string name="description">beschrijving</string>
+
 </resources>
