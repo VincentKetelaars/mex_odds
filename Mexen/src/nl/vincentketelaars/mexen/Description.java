@@ -5,18 +5,20 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 public class Description extends Activity {
 	
-	private final String descriptionFileName = "explanation.html";
+	private final String descriptionFileName = "explanation_%s.html";
 	TextView descriptionTextView;
 
 	@Override
@@ -37,7 +39,7 @@ public class Description extends Activity {
 		DataInputStream in = null;
 		char[] text = new char[10000];
 		try {
-			InputStream input = getAssets().open(descriptionFileName);
+			InputStream input = getAssets().open(getDescriptionFile());
 			in = new DataInputStream(input);
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			br.read(text);
@@ -51,6 +53,14 @@ public class Description extends Activity {
 			}
 		}
 		return String.copyValueOf(text);
+	}
+	
+	private String getDescriptionFile() {
+		if (Locale.getDefault().getLanguage().equals("nl")) {
+			return String.format(descriptionFileName, "nl");
+		}
+		Log.i("Description", "The user prefers this language: " + Locale.getDefault().getLanguage());
+		return String.format(descriptionFileName, "eng");
 	}
 	
 	@Override
