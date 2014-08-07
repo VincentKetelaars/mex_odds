@@ -1,4 +1,4 @@
-package nl.vincentketelaars.mexen;
+package nl.vincentketelaars.mexen.objects;
 
 import java.util.Calendar;
 

@@ -1,4 +1,4 @@
-package nl.vincentketelaars.mexen;
+package nl.vincentketelaars.mexen.views;
 
 /*
  * The MIT License Copyright (c) 2011 Paul Soucy (paul@dev-smart.com)
@@ -55,6 +55,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import nl.vincentketelaars.mexen.R;
+import nl.vincentketelaars.mexen.R.styleable;
 
 // @formatter:off
 /**

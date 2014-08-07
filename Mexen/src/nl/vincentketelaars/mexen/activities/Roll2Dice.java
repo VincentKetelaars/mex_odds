@@ -14,12 +14,20 @@
  *  along with Simple Dice.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package nl.vincentketelaars.mexen;
+package nl.vincentketelaars.mexen.activities;
 
 import java.util.ArrayList;
 
+import nl.vincentketelaars.mexen.R;
+import nl.vincentketelaars.mexen.objects.Throw;
+import nl.vincentketelaars.mexen.objects.Turn;
+import nl.vincentketelaars.mexen.views.HorizontalListView;
+import nl.vincentketelaars.mexen.views.TwoDiceVerticleAdapter;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,11 +46,13 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 	private enum GameMode { FREEPLAY, PLAYER }
 	private GameMode currentMode = GameMode.FREEPLAY;
 	private int currentThrows = -1;
-	private int defaultVastHighestNumber = 3;
 	private HorizontalListView previousTurnsView;
 	private TwoDiceVerticleAdapter throwsAdapter;
 	private ArrayList<Turn> turns;
 	private ArrayList<Throw> currentTurn;
+	private boolean automaticVast;
+	private int highestVastNumber;
+	private boolean automaticTranscendVast;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -192,7 +202,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 
 	@Override
 	protected int getHighestVastNumber() {
-		return 3;
+		return highestVastNumber;
 	}
 
 	@Override
@@ -213,6 +223,10 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 		switch (item.getItemId()) {
 		case R.id.game_mode:
 			showPopup(findViewById(R.id.game_mode));
+			return true;
+		case R.id.mex2_settings:
+			Intent intent = new Intent(this, Mex2DiceSettingsActivity.class);
+			startActivity(intent);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -273,11 +287,12 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 			boolean v1 = getVast(1);
 			setUnvast(0);
 			setUnvast(1);
+			int transcendNumber = automaticTranscendVast ? 3 : 2; // 3 for transcending to next turn, 2 for not
 			if (isMex(getNumber(0), getNumber(1)) || isLow(getNumber(0), getNumber(1))) {
 				currentThrows = -1; // Becomes zero later
 			} else if (isPoint(getNumber(0), getNumber(1))) {
 				currentThrows--; // Becomes the same later
-			} else if (currentThrows < 2) { // Throw is added later, so 2 instead of 3
+			} else if (automaticVast && currentThrows < transcendNumber) {
 				if (v0 || v1) {
 					updateVastAlready(v0 ? 0 : 1);
 				} else {
@@ -304,7 +319,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 	private void updateVastAlready(int already) {
 		for (int i = 0; i < numDice(); i++) {
 			if (already != i) {
-				if ( getNumber(i) <= defaultVastHighestNumber) {
+				if ( getNumber(i) <= getHighestVastNumber()) {
 					setVast(i);
 					break;
 				}
@@ -343,4 +358,13 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 	private void resetPlay() {
 		throwsAdapter.clearThrows();
 	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		automaticVast = sp.getBoolean("pref_auto_withhold", true);
+		highestVastNumber = sp.getInt("pref_auto_withhold_number", 3);
+		automaticTranscendVast = sp.getBoolean("pref_auto_withhold_transcend", true);		
+	}	
 }

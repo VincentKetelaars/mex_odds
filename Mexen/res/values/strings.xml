@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">Mexen</string>
+    <string name="settings">Instellingen</string>
     <string name="roll_activity_name">%d Dobbels</string>
     <string name="mexen_2_dice">2 Dobbels</string>
     <string name="mexen_3_dice">3 Dobbels</string>
@@ -23,5 +24,12 @@
     <string name="share">Deel</string>
     <string name="share_string">Ik ben erg tevreden met de Mex Kansen app. Jij kan hem ook downloaden op https://play.google.com/store/apps/details?id=nl.vincentketelaars.mexen</string>
     <string name="description">beschrijving</string>
+    <string name="pref_withhold_title">Laten liggen</string>
+    <string name="pref_auto_withhold">Automatisch laten liggen</string>
+    <string name="pref_auto_withhold_summary">Laat dobbelstenen automatisch liggen</string>
+    <string name="pref_auto_withhold_number">Ogen laten liggen</string>
+    <string name="pref_auto_withhold_number_summary">Hoogste aantal ogen te laten liggen</string>
+    <string name="pref_auto_withhold_transcend">Volgende beurt laten liggen</string>
+    <string name="pref_auto_withhold_transcend_summary">Sta het laten liggen van een dobbelsteen voor de volgende beurt toe</string>
 
 </resources>

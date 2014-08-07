@@ -5,4 +5,9 @@
           android:title="@string/game_mode"
           android:showAsAction="ifRoom" />
     
+     <item android:id="@+id/mex2_settings"
+          android:icon="@drawable/settings"
+          android:title="@string/settings"
+          android:showAsAction="ifRoom" />
+    
 </menu>

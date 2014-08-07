@@ -1,5 +1,10 @@
-package nl.vincentketelaars.mexen;
+package nl.vincentketelaars.mexen.activities;
 
+import nl.vincentketelaars.mexen.R;
+import nl.vincentketelaars.mexen.R.id;
+import nl.vincentketelaars.mexen.R.layout;
+import nl.vincentketelaars.mexen.R.menu;
+import nl.vincentketelaars.mexen.R.string;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Point;

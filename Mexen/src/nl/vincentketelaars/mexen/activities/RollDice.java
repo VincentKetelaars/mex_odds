@@ -14,11 +14,12 @@
  *  along with Simple Dice.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package nl.vincentketelaars.mexen;
+package nl.vincentketelaars.mexen.activities;
 
 import java.util.Locale;
 import java.util.Random;
 
+import nl.vincentketelaars.mexen.R;
 import android.app.Activity;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;

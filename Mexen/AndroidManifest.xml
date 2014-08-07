@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="nl.vincentketelaars.mexen.MexGame"
+            android:name="nl.vincentketelaars.mexen.activities.MexGame"
             android:label="@string/app_name"
             android:screenOrientation="sensorPortrait" >
             <intent-filter>
@@ -24,36 +24,46 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="nl.vincentketelaars.mexen.Roll2Dice"
+            android:name="nl.vincentketelaars.mexen.activities.Roll2Dice"
             android:label="@string/app_name"
-            android:parentActivityName="nl.vincentketelaars.mexen.MexGame"
+            android:parentActivityName="nl.vincentketelaars.mexen.activities.MexGame"
             android:screenOrientation="sensorPortrait" >
 
             <!-- Older than API 16 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="nl.vincentketelaars.mexen.MexGame" />
+                android:value="nl.vincentketelaars.mexen.activities.MexGame" />
         </activity>
         <activity
-            android:name="nl.vincentketelaars.mexen.Roll3Dice"
+            android:name="nl.vincentketelaars.mexen.activities.Roll3Dice"
             android:label="@string/app_name"
-            android:parentActivityName="nl.vincentketelaars.mexen.MexGame"
+            android:parentActivityName="nl.vincentketelaars.mexen.activities.MexGame"
             android:screenOrientation="sensorPortrait" >
 
             <!-- Older than API 16 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="nl.vincentketelaars.mexen.MexGame" />
+                android:value="nl.vincentketelaars.mexen.activities.MexGame" />
         </activity>
         <activity
-            android:name="nl.vincentketelaars.mexen.Description"
+            android:name="nl.vincentketelaars.mexen.activities.Description"
             android:label="@string/app_name"
-            android:parentActivityName="nl.vincentketelaars.mexen.MexGame" >
-            
+            android:parentActivityName="nl.vincentketelaars.mexen.activities.MexGame" >
+
             <!-- Older than API 16 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="nl.vincentketelaars.mexen.MexGame" />
+                android:value="nl.vincentketelaars.mexen.activities.MexGame" />
+        </activity>
+        <activity
+            android:name="nl.vincentketelaars.mexen.activities.Mex2DiceSettingsActivity"
+            android:label="@string/settings" 
+            android:parentActivityName="nl.vincentketelaars.mexen.activities.Roll2Dice" >
+
+            <!-- Older than API 16 -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="nl.vincentketelaars.mexen.activities.Roll2Dice" />
         </activity>
     </application>
 

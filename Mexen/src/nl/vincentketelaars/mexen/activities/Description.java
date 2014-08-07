@@ -1,4 +1,4 @@
-package nl.vincentketelaars.mexen;
+package nl.vincentketelaars.mexen.activities;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Locale;
 
+import nl.vincentketelaars.mexen.R;
+import nl.vincentketelaars.mexen.R.id;
+import nl.vincentketelaars.mexen.R.layout;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;

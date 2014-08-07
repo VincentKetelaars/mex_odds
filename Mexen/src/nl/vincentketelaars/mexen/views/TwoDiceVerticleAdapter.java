@@ -1,7 +1,12 @@
-package nl.vincentketelaars.mexen;
+package nl.vincentketelaars.mexen.views;
 
 import java.util.ArrayList;
 
+import nl.vincentketelaars.mexen.R;
+import nl.vincentketelaars.mexen.R.drawable;
+import nl.vincentketelaars.mexen.R.id;
+import nl.vincentketelaars.mexen.R.layout;
+import nl.vincentketelaars.mexen.objects.Throw;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;

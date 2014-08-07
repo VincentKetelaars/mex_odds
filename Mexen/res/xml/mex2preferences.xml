@@ -1,0 +1,32 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory 
+        android:title="@string/pref_withhold_title"
+        android:key="pref_withhold_settings">
+        
+        <CheckBoxPreference
+            android:key="pref_auto_withhold"
+            android:summary="@string/pref_auto_withhold_summary"
+            android:title="@string/pref_auto_withhold"
+            android:defaultValue="true" />
+        
+        <nl.vincentketelaars.mexen.objects.IntListPreference
+            android:key="pref_auto_withhold_number"
+            android:summary="@string/pref_auto_withhold_number_summary"
+            android:title="@string/pref_auto_withhold_number"
+            android:defaultValue="3"
+            android:numeric="integer"
+            android:maxLength="1"
+            android:dependency="pref_auto_withhold"            
+	        android:dialogTitle="@string/pref_auto_withhold_number_summary"
+	        android:entries="@array/allowed_withhold_array"
+	        android:entryValues="@array/allowed_withhold_array" />
+                
+        <CheckBoxPreference
+            android:key="pref_auto_withhold_transcend"
+            android:summary="@string/pref_auto_withhold_transcend_summary"
+            android:title="@string/pref_auto_withhold_transcend"
+            android:defaultValue="true"
+            android:dependency="pref_auto_withhold" />
+        
+    </PreferenceCategory>
+</PreferenceScreen>
