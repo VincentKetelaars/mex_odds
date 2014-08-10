@@ -107,13 +107,14 @@ public abstract class RollDice extends Activity {
 		}
 		
 		// Set drawable
-		animationHandler = new Handler() {
-			public void handleMessage(Message msg) {
+		animationHandler = new Handler(new Handler.Callback() {
+			public boolean handleMessage(Message msg) {
 				for (int i = 0; i < dies.length; i++) {
 					dies[i].setImageDrawable(dice[roll[i]]);
 				}
+				return true;
 			}
-		};
+		});
 		
 		// Listener that increments the number on the dice
 		OnClickListener diceListener = new OnClickListener() {
@@ -147,7 +148,7 @@ public abstract class RollDice extends Activity {
 						}
 						if (isSpecialVastCase()) break;
 						if (vastImages[i].getVisibility() == View.INVISIBLE && numVast < dies.length - 1 &&
-							roll[i] < getHighestVastNumber()) { // Only vast on 1, 2 or 3
+							roll[i] < getHighestVastNumber()) { // Only vast till highest allowed number
 							setVast(i);
 						}
 					}
@@ -199,9 +200,12 @@ public abstract class RollDice extends Activity {
 	 * Evaluate the chances of throwing the current throw and higher and set these values to the 
 	 */
 	protected void evaluateChances() {
+		// Calculate chances before going on UI thread
+		final float throwChance = determineThrowChance();
+		final float higherChance = determineHigherChance();
 		activity.runOnUiThread(new Runnable() {
 			public void run() {
-				setChances(determineThrowChance(), determineHigherChance());
+				setChances(throwChance, higherChance);
 			}
 		});
 	}
@@ -283,10 +287,10 @@ public abstract class RollDice extends Activity {
 	 * @param i
 	 */
 	protected void setUnvast(final int i) {
+		vast[i] = false;
 		vastImages[i].post(new Runnable() {
 		    public void run() {
 				vastImages[i].setVisibility(View.INVISIBLE);
-				vast[i] = false;
 		    } 
 		});
 	}
@@ -296,10 +300,10 @@ public abstract class RollDice extends Activity {
 	 * @param i
 	 */
 	protected void setVast(final int i) {
+		vast[i] = true;
 		vastImages[i].post(new Runnable() {
 		    public void run() {
 				vastImages[i].setVisibility(View.VISIBLE);
-				vast[i] = true;
 		    } 
 		});
 	}
