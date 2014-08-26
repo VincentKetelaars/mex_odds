@@ -31,5 +31,9 @@
     <string name="pref_auto_withhold_number_summary">Hoogste aantal ogen te laten liggen</string>
     <string name="pref_auto_withhold_transcend">Volgende beurt laten liggen</string>
     <string name="pref_auto_withhold_transcend_summary">Sta het laten liggen van een dobbelsteen voor de volgende beurt toe</string>
+    <string name="title_activity_generic">GenericActivity</string>
+    <string name="stop_game">Wil je het spel beeindigen?</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nee</string>
 
 </resources>

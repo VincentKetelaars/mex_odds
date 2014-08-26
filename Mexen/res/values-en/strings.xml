@@ -31,5 +31,8 @@
     <string name="pref_auto_withhold_number_summary">Determine the highest number of pips to withhold</string>
     <string name="pref_auto_withhold_transcend">Allow withhold turn transcendence</string>
     <string name="pref_auto_withhold_transcend_summary">Allow the withholding of a die for the next turn</string>
+    <string name="stop_game">Do you want to end the game?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
     
 </resources>

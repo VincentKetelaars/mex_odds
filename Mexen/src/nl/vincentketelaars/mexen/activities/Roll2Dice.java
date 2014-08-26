@@ -19,8 +19,9 @@ package nl.vincentketelaars.mexen.activities;
 import java.util.ArrayList;
 
 import nl.vincentketelaars.mexen.R;
+import nl.vincentketelaars.mexen.objects.Game;
+import nl.vincentketelaars.mexen.objects.GameMode;
 import nl.vincentketelaars.mexen.objects.Throw;
-import nl.vincentketelaars.mexen.objects.Turn;
 import nl.vincentketelaars.mexen.views.HorizontalListView;
 import nl.vincentketelaars.mexen.views.TwoDiceVerticleAdapter;
 import android.content.Intent;
@@ -42,14 +43,9 @@ import android.widget.PopupMenu;
 import android.widget.PopupMenu.OnMenuItemClickListener;
 
 public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
-
-	private enum GameMode { FREEPLAY, PLAYER }
-	private GameMode currentMode = GameMode.FREEPLAY;
 	private int currentThrows = -1;
 	private HorizontalListView previousTurnsView;
 	private TwoDiceVerticleAdapter throwsAdapter;
-	private ArrayList<Turn> turns;
-	private ArrayList<Throw> currentTurn;
 	private boolean automaticVast;
 	private int highestVastNumber;
 	private boolean automaticTranscendVast;
@@ -60,9 +56,6 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_roll_dice_2);
 		setupViews();
-
-		turns = new ArrayList<Turn>();
-		currentTurn = new ArrayList<Throw>();
 
 		previousTurnsView = (HorizontalListView) findViewById(R.id.previous_throws_scroll_view);
 		throwsAdapter = new TwoDiceVerticleAdapter(this, new ArrayList<Throw>());
@@ -267,20 +260,19 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 	 */
 	private void updateView() {
 		if (currentMode == GameMode.FREEPLAY) {
-			super.throw_button.setText(getResources().getString(R.string.throw_dice));
+			super.throwButton.setText(getResources().getString(R.string.throw_dice));
 			currentThrows = -1;
 		} else if (currentMode == GameMode.PLAYER) {
-			super.throw_button.setText(getResources().getString(R.string.throw_one));
+			super.throwButton.setText(getResources().getString(R.string.throw_one));
 			currentThrows = 0;
 		}
 	}
 
 	@Override
 	protected void afterRollDice() {
-		currentTurn.add(new Throw(getNumber(0), getNumber(1)));
+		addToThrows(new Throw(getNumber(0), getNumber(1)));
 		switch(currentMode) {
 		case FREEPLAY:
-			addDiceToPrevious(currentTurn.get(currentTurn.size() - 1));
 			break;
 		case PLAYER:
 			boolean v0 = getVast(0);
@@ -305,15 +297,13 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 			if (currentThrows == 0 && !isPoint(getNumber(0), getNumber(1)))
 				turnFinished();
 			setThrowLabel();
+			break;
+		case LOCALGAME:
+			break;
+		default:
+			Log.e("Roll2Dice", String.format("This GameMode is not handled %s", currentMode));
 			break;			
 		}
-	}
-
-	private void turnFinished() {
-		Turn t = new Turn(currentTurn);
-		turns.add(t);
-		addDiceToPrevious(t.finalThrow());
-		currentTurn = new ArrayList<Throw>();
 	}
 
 	private void updateVastAlready(int already) {
@@ -355,8 +345,11 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 		return currentMode != GameMode.PLAYER;
 	}
 
-	private void resetPlay() {
+	@Override
+	protected void resetPlay() {
+		super.resetPlay();
 		throwsAdapter.clearThrows();
+		setUnvast(0); setUnvast(1);
 	}
 
 	@Override
@@ -366,5 +359,19 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 		automaticVast = sp.getBoolean("pref_auto_withhold", true);
 		highestVastNumber = sp.getInt("pref_auto_withhold_number", 3);
 		automaticTranscendVast = sp.getBoolean("pref_auto_withhold_transcend", true);		
-	}	
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+	}
+	
+	protected void addToThrows(Throw t) {
+		super.addToThrows(t);
+		addDiceToPrevious(t);		
+	}
+	
+	
+	
 }

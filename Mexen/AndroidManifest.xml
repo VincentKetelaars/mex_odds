@@ -57,13 +57,17 @@
         </activity>
         <activity
             android:name="nl.vincentketelaars.mexen.activities.Mex2DiceSettingsActivity"
-            android:label="@string/settings" 
+            android:label="@string/settings"
             android:parentActivityName="nl.vincentketelaars.mexen.activities.Roll2Dice" >
 
             <!-- Older than API 16 -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="nl.vincentketelaars.mexen.activities.Roll2Dice" />
+        </activity>
+        <activity
+            android:name="nl.vincentketelaars.mexen.activities.GenericActivity"
+            android:label="@string/title_activity_generic" >
         </activity>
     </application>
 

@@ -1,11 +1,6 @@
 package nl.vincentketelaars.mexen.activities;
 
 import nl.vincentketelaars.mexen.R;
-import nl.vincentketelaars.mexen.R.id;
-import nl.vincentketelaars.mexen.R.layout;
-import nl.vincentketelaars.mexen.R.menu;
-import nl.vincentketelaars.mexen.R.string;
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -21,7 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
-public class MexGame extends Activity implements OnClickListener {
+public class MexGame extends GenericActivity implements OnClickListener {
 	
 	ImageView mexButton; 
 	ImageView blindMexButton;
@@ -57,6 +52,8 @@ public class MexGame extends Activity implements OnClickListener {
 		params.setMargins(frameWidthMargin, frameHeightMargin, frameWidthMargin, frameHeightMargin);
 		mexButton.setLayoutParams(params);
 		blindMexButton.setLayoutParams(params);
+		
+		// Get player from database or instantiate new one
     }
 	
 	private Point getSize() {

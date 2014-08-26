@@ -17,11 +17,9 @@
 package nl.vincentketelaars.mexen.activities;
 
 import nl.vincentketelaars.mexen.R;
-import nl.vincentketelaars.mexen.R.id;
-import nl.vincentketelaars.mexen.R.layout;
+import nl.vincentketelaars.mexen.objects.Throw;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -343,7 +341,6 @@ public class Roll3Dice extends RollDice {
 
 	@Override
 	protected void afterRollDice() {
-		// TODO Auto-generated method stub
-		
+		addToThrows(new Throw(getNumber(0), getNumber(1), getNumber(2)));		
 	}
 }
