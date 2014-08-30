@@ -31,6 +31,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.AsyncTask;
@@ -49,7 +53,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public abstract class RollDice extends GenericActivity {
+public abstract class RollDice extends GenericActivity implements SensorEventListener {
 	private Activity activity;
 	private final int rollAnimations = 50;
 	private final int delayTime = 15;
@@ -71,6 +75,8 @@ public abstract class RollDice extends GenericActivity {
 	protected Game currentGame;
 	private ArrayList<Throw> currentThrows;
 	private MexGameDbHelper MGDbHelper;
+	private SensorManager sensorManager;
+	private float MINIMUM_ACCELARATION = 2;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -91,6 +97,8 @@ public abstract class RollDice extends GenericActivity {
 		currentThrows = new ArrayList<Throw>();
 
 		MGDbHelper = new MexGameDbHelper(this);
+
+		sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
 		getActionBar().setTitle(String.format(getResources().getString(R.string.roll_activity_name), numDice()));
 	}
@@ -374,21 +382,24 @@ public abstract class RollDice extends GenericActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+				SensorManager.SENSOR_DELAY_NORMAL);
 		retrieveCurrentGameFromDb();
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		sensorManager.unregisterListener(this);
 		currentGame.addPlayer(localPlayer());
 		writeCurrentGameToDb();
 	}
-	
+
 	protected void writeCurrentGameToDb() {
 		new CommitGameToDbAsyncTask().execute();
-		
+
 	}
-	
+
 	protected void retrieveCurrentGameFromDb() {
 		new RetrieveGameFromDbAsyncTask().execute();		
 	}
@@ -400,7 +411,7 @@ public abstract class RollDice extends GenericActivity {
 			return null;
 		}
 	}
-	
+
 	private class RetrieveGameFromDbAsyncTask extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... urls) {
@@ -424,35 +435,35 @@ public abstract class RollDice extends GenericActivity {
 	private void onExitingGame(final boolean backPressed, final boolean homePressed) {
 		if (currentMode == GameMode.FREEPLAY) {
 			turnFinished();
-            if (backPressed)
-            	RollDice.super.onBackPressed();
-            else if (homePressed)
-    			NavUtils.navigateUpFromSameTask(activity);		
-            return;
+			if (backPressed)
+				RollDice.super.onBackPressed();
+			else if (homePressed)
+				NavUtils.navigateUpFromSameTask(activity);		
+			return;
 		}
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-		    @Override
-		    public void onClick(DialogInterface dialog, int which) {
-		        switch (which){
-		        case DialogInterface.BUTTON_POSITIVE:
-		            turnFinished();
-		            if (backPressed)
-		            	activity.onBackPressed();
-		            else if (homePressed)
-		    			NavUtils.navigateUpFromSameTask(activity);
-		            break;
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				switch (which){
+				case DialogInterface.BUTTON_POSITIVE:
+					turnFinished();
+					if (backPressed)
+						activity.onBackPressed();
+					else if (homePressed)
+						NavUtils.navigateUpFromSameTask(activity);
+					break;
 
-		        case DialogInterface.BUTTON_NEGATIVE:
-		            // Doing nothing..
-		            break;
-		        }
-		    }
+				case DialogInterface.BUTTON_NEGATIVE:
+					// Doing nothing..
+					break;
+				}
+			}
 		};
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(getResources().getString(R.string.stop_game))
-			.setPositiveButton(getResources().getString(R.string.yes), dialogClickListener)
-		    .setNegativeButton(getResources().getString(R.string.no), dialogClickListener).show();
+		.setPositiveButton(getResources().getString(R.string.yes), dialogClickListener)
+		.setNegativeButton(getResources().getString(R.string.no), dialogClickListener).show();
 	}
 
 	protected void resetPlay() {
@@ -460,5 +471,32 @@ public abstract class RollDice extends GenericActivity {
 		writeCurrentGameToDb();
 		currentGame = new Game(currentMode);
 	}
-	
+
+	@Override
+	public void onSensorChanged(SensorEvent event) {
+		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+			getAccelerometer(event);
+		}
+	}
+
+	private void getAccelerometer(SensorEvent event) {
+		float[] values = event.values;
+		// Movement
+		float x = values[0];
+		float y = values[1];
+		float z = values[2];
+
+		float accelationSquareRoot = (x * x + y * y + z * z) 
+				/ (SensorManager.GRAVITY_EARTH * SensorManager.GRAVITY_EARTH);
+		if (accelationSquareRoot >= MINIMUM_ACCELARATION ) {
+			if (throwButton.isEnabled()) {
+				throwButton.performClick();
+			}
+		}
+	}
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+	}
 }

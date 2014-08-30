@@ -19,7 +19,6 @@ package nl.vincentketelaars.mexen.activities;
 import java.util.ArrayList;
 
 import nl.vincentketelaars.mexen.R;
-import nl.vincentketelaars.mexen.objects.Game;
 import nl.vincentketelaars.mexen.objects.GameMode;
 import nl.vincentketelaars.mexen.objects.Throw;
 import nl.vincentketelaars.mexen.views.HorizontalListView;
@@ -370,8 +369,5 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 	protected void addToThrows(Throw t) {
 		super.addToThrows(t);
 		addDiceToPrevious(t);		
-	}
-	
-	
-	
+	}	
 }
