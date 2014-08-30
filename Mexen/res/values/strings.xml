@@ -3,6 +3,7 @@
 
     <string name="app_name">Mexen</string>
     <string name="settings">Instellingen</string>
+    <string name="general">Algemeen</string>
     <string name="roll_activity_name">%d Dobbels</string>
     <string name="mexen_2_dice">2 Dobbels</string>
     <string name="mexen_3_dice">3 Dobbels</string>
@@ -31,6 +32,8 @@
     <string name="pref_auto_withhold_number_summary">Hoogste aantal ogen te laten liggen</string>
     <string name="pref_auto_withhold_transcend">Volgende beurt laten liggen</string>
     <string name="pref_auto_withhold_transcend_summary">Sta het laten liggen van een dobbelsteen voor de volgende beurt toe</string>
+    <string name="pref_shake_throw">Dobbelstenen gooien met beweging</string>
+    <string name="pref_shake_throw_summary">Gooi de dobbelstenen wanneer het apparaat een versnelde beweging maakt</string>
     <string name="title_activity_generic">GenericActivity</string>
     <string name="stop_game">Wil je het spel beeindigen?</string>
     <string name="yes">Ja</string>

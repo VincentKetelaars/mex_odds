@@ -29,6 +29,7 @@ import nl.vincentketelaars.mexen.objects.Turn;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
@@ -41,6 +42,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -77,6 +79,7 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 	private MexGameDbHelper MGDbHelper;
 	private SensorManager sensorManager;
 	private float MINIMUM_ACCELARATION = 2;
+	private boolean throwOnShake;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -382,8 +385,11 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 	@Override
 	protected void onResume() {
 		super.onResume();
-		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-				SensorManager.SENSOR_DELAY_NORMAL);
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		throwOnShake  = sp.getBoolean("pref_shake_throw", false);
+		if (throwOnShake)
+			sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+					SensorManager.SENSOR_DELAY_NORMAL);
 		retrieveCurrentGameFromDb();
 	}
 
@@ -422,7 +428,6 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 				currentGame.addPlayer(localPlayer());
 				// TODO: Update current gamemode?
 			}
-			Log.i("RollDice", currentGame.toString());
 			return null;
 		}
 	}

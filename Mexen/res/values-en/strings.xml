@@ -3,6 +3,7 @@
 
     <string name="app_name">Mexen</string>
     <string name="settings">Settings</string>
+    <string name="general">General</string>
     <string name="roll_activity_name">%d Dice</string>
     <string name="mexen_2_dice">2 Dice</string>
     <string name="mexen_3_dice">3 Dice</string>
@@ -31,6 +32,8 @@
     <string name="pref_auto_withhold_number_summary">Determine the highest number of pips to withhold</string>
     <string name="pref_auto_withhold_transcend">Allow withhold turn transcendence</string>
     <string name="pref_auto_withhold_transcend_summary">Allow the withholding of a die for the next turn</string>
+    <string name="pref_shake_throw">Throw dice on movement</string>
+    <string name="pref_shake_throw_summary">Throw the dice on device accelaration</string>
     <string name="stop_game">Do you want to end the game?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
