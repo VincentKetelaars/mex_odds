@@ -57,15 +57,16 @@ public class MexGameDbHelper extends SQLiteOpenHelper {
 	public void addGameToDatabase(Game g) throws SQLiteException {
 		if (g.getPlayers().size() == 0 || g.getTurns().size() == 0) //No point adding a game that doesn't contain anything.
 			return;
-		
+
 		SQLiteDatabase db = getReadableDatabase();
 
 		// Create Game ContentValues
 		ContentValues gameValues = new ContentValues();
 		gameValues.put(GameEntry.COLUMN_NAME_GAME_ID, g.getId().toString());
 		gameValues.put(GameEntry.COLUMN_NAME_GAME_MODE, g.getGameMode().getOrdinal());
-		gameValues.put(GameEntry.COLUMN_NAME_DATE_TIME, g.getCreationDate().getTimeInMillis());
-		db.insertWithOnConflict(GameEntry.TABLE_NAME, "null", gameValues, SQLiteDatabase.CONFLICT_IGNORE);
+		gameValues.put(GameEntry.COLUMN_NAME_START_TIME, g.getCreationDate().getTimeInMillis());
+		gameValues.put(GameEntry.COLUMN_NAME_FINISH_TIME, g.getFinishDate().getTimeInMillis());
+		db.insertWithOnConflict(GameEntry.TABLE_NAME, "null", gameValues, SQLiteDatabase.CONFLICT_REPLACE);
 
 		// Create Player ContentValues for each player in the game
 		ContentValues playerValues;
@@ -82,26 +83,29 @@ public class MexGameDbHelper extends SQLiteOpenHelper {
 		ContentValues turnEntries;
 		ContentValues throwEntries;
 		for (Turn turn : g.getTurns()) {
-			if (turn.getNumThrows() == 0)
-				continue;
 			turnEntries = new ContentValues();
 			turnEntries.put(TurnEntry.COLUMN_NAME_GAME_ID, g.getId().toString());
 			turnEntries.put(TurnEntry.COLUMN_NAME_TURN_ID, turn.getId().toString());
 			turnEntries.put(TurnEntry.COLUMN_NAME_PLAYER_ID, turn.getPlayer().getId().toString());
-			db.insertWithOnConflict(TurnEntry.TABLE_NAME, "null", turnEntries, SQLiteDatabase.CONFLICT_IGNORE);
+			turnEntries.put(TurnEntry.COLUMN_NAME_FINISH_TIME, turn.getFinishTime().getTimeInMillis());
+			turnEntries.put(TurnEntry.COLUMN_NAME_THROW_NUMBER, turn.getCurrentThrowTurn());
+			db.insertWithOnConflict(TurnEntry.TABLE_NAME, "null", turnEntries, SQLiteDatabase.CONFLICT_REPLACE);
 
 			for (Throw t : turn.getThrows()) {
 				throwEntries = new ContentValues();
 				throwEntries.put(ThrowEntry.COLUMN_NAME_TURN_ID, turn.getId().toString());
 				throwEntries.put(ThrowEntry.COLUMN_NAME_THROW_ID, t.getId().toString());
 				throwEntries.put(ThrowEntry.COLUMN_NAME_THROW_DATE_TIME, t.getDateTime().getTimeInMillis());
+				throwEntries.put(ThrowEntry.COLUMN_NAME_VAST_ONE, t.getVast(0) ? 1 : 0);
+				throwEntries.put(ThrowEntry.COLUMN_NAME_VAST_TWO, t.getVast(1) ? 1 : 0);
+				throwEntries.put(ThrowEntry.COLUMN_NAME_VAST_THREE, t.getVast(2) ? 1 : 0);
 				throwEntries.put(ThrowEntry.COLUMN_NAME_THROW_ONE, t.getNumberOne());
 				throwEntries.put(ThrowEntry.COLUMN_NAME_THROW_TWO, t.getNumberTwo());
 				throwEntries.put(ThrowEntry.COLUMN_NAME_THROW_THREE, t.getNumberThree()); // 0 for 2 dice
 				db.insertWithOnConflict(ThrowEntry.TABLE_NAME, "null", throwEntries, SQLiteDatabase.CONFLICT_IGNORE);
 			}
 		}
-		
+
 		db.close();
 	}
 
@@ -110,19 +114,22 @@ public class MexGameDbHelper extends SQLiteOpenHelper {
 
 		String[] gameProjection = {
 				GameEntry.COLUMN_NAME_GAME_ID,
-				GameEntry.COLUMN_NAME_DATE_TIME,
+				GameEntry.COLUMN_NAME_START_TIME,
+				GameEntry.COLUMN_NAME_FINISH_TIME,
 				GameEntry.COLUMN_NAME_GAME_MODE
 		};
 
-		String sortOrder = GameEntry.COLUMN_NAME_DATE_TIME + " DESC";
+		String sortOrder = GameEntry.COLUMN_NAME_START_TIME + " DESC";
 
 		Cursor c = db.query(GameEntry.TABLE_NAME, gameProjection, null, null, null, null, sortOrder);
 
 		if (!c.moveToFirst()) // DESC, so first should be the latest
 			return null;
-		
-		Calendar gameTime = Calendar.getInstance();
-		gameTime.setTimeInMillis(c.getLong(c.getColumnIndexOrThrow(GameEntry.COLUMN_NAME_DATE_TIME)));
+
+		Calendar startTime = Calendar.getInstance();
+		startTime.setTimeInMillis(c.getLong(c.getColumnIndexOrThrow(GameEntry.COLUMN_NAME_START_TIME)));
+		Calendar finishTime = Calendar.getInstance();
+		finishTime.setTimeInMillis(c.getLong(c.getColumnIndexOrThrow(GameEntry.COLUMN_NAME_FINISH_TIME)));
 		String gameId = c.getString(c.getColumnIndexOrThrow(GameEntry.COLUMN_NAME_GAME_ID));
 		int gameMode = c.getInt(c.getColumnIndexOrThrow(GameEntry.COLUMN_NAME_GAME_MODE));
 
@@ -146,15 +153,20 @@ public class MexGameDbHelper extends SQLiteOpenHelper {
 
 		String[] turnProjection = {
 				TurnEntry.COLUMN_NAME_TURN_ID,
-				TurnEntry.COLUMN_NAME_PLAYER_ID
+				TurnEntry.COLUMN_NAME_PLAYER_ID,
+				TurnEntry.COLUMN_NAME_FINISH_TIME,
+				TurnEntry.COLUMN_NAME_THROW_NUMBER
 		};
 
 		String[] throwProjection = {
 				ThrowEntry.COLUMN_NAME_THROW_ID,
 				ThrowEntry.COLUMN_NAME_THROW_DATE_TIME,
+				ThrowEntry.COLUMN_NAME_VAST_ONE,
+				ThrowEntry.COLUMN_NAME_VAST_TWO,
+				ThrowEntry.COLUMN_NAME_VAST_THREE,
 				ThrowEntry.COLUMN_NAME_THROW_ONE,
 				ThrowEntry.COLUMN_NAME_THROW_TWO,
-				ThrowEntry.COLUMN_NAME_THROW_THREE,
+				ThrowEntry.COLUMN_NAME_THROW_THREE
 		};
 
 		sortOrder = TurnEntry.COLUMN_NAME_GAME_ID + " DESC";
@@ -180,24 +192,27 @@ public class MexGameDbHelper extends SQLiteOpenHelper {
 			while (cs.moveToNext()) {
 				throwsList.add(getThrowFromRow(cs));
 			}
-			
+
 			String playerId = c.getString(c.getColumnIndexOrThrow(TurnEntry.COLUMN_NAME_PLAYER_ID));
 			Player turnPlayer = null;
 			for (Player p : players) {
 				if (p.getId().toString().equals(playerId))
 					turnPlayer = p;				
 			}
-			
-			turns.add(new Turn(throwsList, UUID.fromString(turnId), turnPlayer));
+
+			long turnFinishTime = c.getLong(c.getColumnIndexOrThrow(TurnEntry.COLUMN_NAME_FINISH_TIME));
+			int turnThrowNumber = c.getInt(c.getColumnIndexOrThrow(TurnEntry.COLUMN_NAME_THROW_NUMBER));
+
+			turns.add(new Turn(throwsList, UUID.fromString(turnId), turnPlayer, turnFinishTime, turnThrowNumber));
 		}
-		
+
 		if (cs != null)
 			cs.close();
-		
+
 		c.close();
 		db.close();
 
-		return new Game(UUID.fromString(gameId), GameMode.values()[gameMode], turns, gameTime, players);
+		return new Game(UUID.fromString(gameId), GameMode.values()[gameMode], turns, startTime, finishTime, players);
 	}
 
 	private Player getPlayerFromRow(Cursor c) {
@@ -212,6 +227,11 @@ public class MexGameDbHelper extends SQLiteOpenHelper {
 	private Throw getThrowFromRow(Cursor c) {
 		return new Throw(UUID.fromString(c.getString(c.getColumnIndexOrThrow(ThrowEntry.COLUMN_NAME_THROW_ID))),
 				c.getLong(c.getColumnIndexOrThrow(ThrowEntry.COLUMN_NAME_THROW_DATE_TIME)), 
+				new boolean[]{
+					c.getInt(c.getColumnIndexOrThrow(ThrowEntry.COLUMN_NAME_VAST_ONE)) != 0,
+					c.getInt(c.getColumnIndexOrThrow(ThrowEntry.COLUMN_NAME_VAST_TWO)) != 0,
+					c.getInt(c.getColumnIndexOrThrow(ThrowEntry.COLUMN_NAME_VAST_THREE)) != 0
+				},
 				c.getInt(c.getColumnIndexOrThrow(ThrowEntry.COLUMN_NAME_THROW_ONE)),
 				c.getInt(c.getColumnIndexOrThrow(ThrowEntry.COLUMN_NAME_THROW_TWO)),
 				c.getInt(c.getColumnIndexOrThrow(ThrowEntry.COLUMN_NAME_THROW_THREE)));

@@ -4,78 +4,90 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.UUID;
 
+import nl.vincentketelaars.mexen.general.StaticOperations;
+import android.util.Log;
+
 public class Turn implements Cloneable {
 	
-	private Throw[] t;
+	private ArrayList<Throw> t;
 	private UUID id;
 	private Player player;
+	private Calendar finishTime;
+	private int currentThrowTurn = -1;
 	
 	public Turn(Turn turn) {
-		instantiateTurn(turn.getId(), turn.getPlayer(), turn.getThrows());
+		instantiateTurn(turn.getId(), turn.getPlayer(), turn.getThrows(), turn.getFinishTime().getTimeInMillis(), turn.getCurrentThrowTurn());
 	}
 	
-	public Turn(Player player, Throw... t) {
-		instantiateTurn(UUID.randomUUID(), player, t);
+	public Turn(Player player) {
+		instantiateTurn(UUID.randomUUID(), player, null, false);
 	}
 	
-	public Turn(Player player, ArrayList<Throw> t) {
-		this.t = new Throw[t.size()];
-		instantiateTurn(UUID.randomUUID(), player, t.toArray(this.t));
+	public Turn(Player player, ArrayList<Throw> t, boolean finished) {
+		instantiateTurn(UUID.randomUUID(), player, t, finished);
 	}
 	
-	public Turn(ArrayList<Throw> t, UUID id, Player player) {
-		this.t = new Throw[t.size()];
-		instantiateTurn(id, player, t.toArray(this.t));
+	public Turn(ArrayList<Throw> t, UUID id, Player player, long finishTime, int throwNumber) {
+		instantiateTurn(id, player, t, finishTime, throwNumber);
 	}
 	
-	private void instantiateTurn(UUID id, Player player, Throw[] t) {
+	private void instantiateTurn(UUID id, Player player, ArrayList<Throw> t, boolean finished) {
+		long time = StaticOperations.originTime().getTimeInMillis();
+		if (finished) {
+			time = Calendar.getInstance().getTimeInMillis();
+		}
+		instantiateTurn(id, player, t, time, this.currentThrowTurn);
+	}
+	
+	private void instantiateTurn(UUID id, Player player, ArrayList<Throw> t, long finishTime, int throwNumber) {
 		this.t = copyThrowArray(t);
 		this.id = id;
 		this.player = player.clone();
+		this.finishTime = Calendar.getInstance();
+		this.finishTime.setTimeInMillis(finishTime);
+		this.currentThrowTurn = throwNumber;
 	}
 	
-	public Throw finalThrow() {
-		if (this.t.length == 0)
+	public Throw latestThrow() {
+		if (this.t.size() == 0)
 			return null;
-		return this.t[this.t.length - 1].clone();
+		return this.t.get(t.size() - 1).clone();
 	}
 	
 	public Calendar startTime() {
-		if (this.t.length == 0)
+		if (this.t.size() == 0)
 			return null;
-		return t[0].getDateTime();
-	}
-	
-	public Calendar finishTime() {
-		if (this.t.length == 0)
-			return null;
-		return t[t.length - 1].getDateTime();
+		return t.get(0).getDateTime();
 	}
 	
 	public Turn clone() {
 		return new Turn(this);
 	}
 	
-	public Throw[] getThrows() {
+	public  ArrayList<Throw> getThrows() {
 		return copyThrowArray(this.t);
 	}
 	
 	public int getNumThrows() {
-		return this.t.length;
+		return this.t.size();
 	}
 	
-	private Throw[] copyThrowArray(Throw[] oldT) {
+	private ArrayList<Throw> copyThrowArray(ArrayList<Throw> oldT) {
 		if (oldT == null)
-			return null;
-		Throw[] newT = new Throw[oldT.length];
-		for (int i = 0; i < oldT.length; i++)
-			newT[i] = oldT[i].clone();			
+			return new ArrayList<Throw>();
+		ArrayList<Throw> newT = new ArrayList<Throw>();
+		for (Throw th : oldT)
+			newT.add(th.clone());		
 		return newT;
 	}
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Turn(");
+		sb.append(this.id.toString() + ", ");
+		sb.append(this.player.toString() + ", ");
+		sb.append(Long.toString(this.finishTime.getTimeInMillis()) + ", ");
+		sb.append(Integer.toString(this.currentThrowTurn) + ", ");
 		for (Throw t : this.t)
 			sb.append(t.toString() + ", ");
 		sb.setLength(sb.length() - 2);
@@ -89,5 +101,32 @@ public class Turn implements Cloneable {
 
 	public Player getPlayer() {
 		return player.clone();
+	}
+
+	public Calendar getFinishTime() {
+		return finishTime;
+	}
+	
+	public boolean isFinished() {
+		return !this.finishTime.equals(StaticOperations.originTime()); // Is not originTime
+	}
+	
+	public void setFinished() {
+		if (this.finishTime.equals(StaticOperations.originTime())) // No overwriting this finishTime
+			this.finishTime = Calendar.getInstance();
+		else
+			Log.i("Turn", "Trying to overwrite existing finish time!");
+	}
+	
+	public void addThrow(Throw th) {
+		this.t.add(th);
+	}
+
+	public int getCurrentThrowTurn() {
+		return currentThrowTurn;
+	}
+
+	public void setCurrentThrowTurn(int currentThrowTurn) {
+		this.currentThrowTurn = currentThrowTurn;
 	}
 }

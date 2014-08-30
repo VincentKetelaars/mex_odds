@@ -4,45 +4,55 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.UUID;
 
+import android.util.Log;
 import nl.vincentketelaars.mexen.general.StaticOperations;
 
 public class Game implements Cloneable {
 	
 	private Calendar creationDate;
+	private Calendar finishDate;
 	private GameMode gameMode;
 	private ArrayList<Turn> turns;
 	private ArrayList<Player> players;
 	private UUID id;
 	
 	public Game(GameMode gm) {
-		initiate(null, gm, null, null, null);
+		initiate(null, gm, null, null, null, null);
 	}
 	
 	public Game(GameMode gm, ArrayList<Turn> turns) {
-		initiate(null, gm, turns, null, null);
+		initiate(null, gm, turns, null, null, null);
 	}
 	
 	public Game(GameMode gm, ArrayList<Turn> turns, Calendar dateTime) {
-		initiate(null, gm, turns, dateTime, null);
+		initiate(null, gm, turns, dateTime, null, null);
 	}
 	
-	public Game(UUID id, GameMode gm, ArrayList<Turn> turns, Calendar dateTime, ArrayList<Player> players) {
-		initiate(id, gm, turns, dateTime, players);
+	public Game(UUID id, GameMode gm, ArrayList<Turn> turns, Calendar startTime, Calendar finishTime, ArrayList<Player> players) {
+		initiate(id, gm, turns, startTime, finishTime, players);
 	}
 	
-	private void initiate(UUID id, GameMode gm, ArrayList<Turn> turns, Calendar dateTime, ArrayList<Player> players) {
+	private void initiate(UUID id, GameMode gm, ArrayList<Turn> turns, Calendar startTime, Calendar finishTime, ArrayList<Player> players) {
 		if (id == null)
 			this.id = (UUID.randomUUID());
 		else
 			this.id = id;
+		
 		this.gameMode = gm;
 		this.turns = copyTurns(turns);
-		if (dateTime != null)
-			this.creationDate = (Calendar) dateTime.clone();
+		
+		if (startTime != null)
+			this.creationDate = (Calendar) startTime.clone();
 		else if (turns != null && !turns.isEmpty())
 			this.creationDate = StaticOperations.max(Calendar.getInstance(), turns.get(0).startTime());
 		else
 			this.creationDate = Calendar.getInstance();
+		
+		if (finishTime != null)
+			this.finishDate = (Calendar) finishTime.clone();
+		else
+			this.finishDate = StaticOperations.originTime();
+		
 		if (players != null)
 			this.players = copyPlayers(players);
 		else
@@ -50,7 +60,7 @@ public class Game implements Cloneable {
 	}
 	
 	public Game clone() {		
-		return new Game(this.getId(), this.getGameMode(), this.turns, this.getCreationDate(), this.players);
+		return new Game(this.getId(), this.getGameMode(), this.turns, this.getCreationDate(), this.getFinishDate(), this.players);
 	}
 	
 	public void addTurn(Turn t) {
@@ -96,7 +106,8 @@ public class Game implements Cloneable {
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(String.format("Game(%d, %s, %s, {", this.creationDate.getTimeInMillis(), this.gameMode.getName(), this.id.toString()));
+		sb.append(String.format("Game(%d, %d, %s, %s, {", this.creationDate.getTimeInMillis(), 
+				this.finishDate.getTimeInMillis(), this.gameMode.getName(), this.id.toString()));
 		for (Turn t : this.turns)
 			sb.append(t.toString() + ", ");
 		if (this.turns.size() > 0)
@@ -125,9 +136,23 @@ public class Game implements Cloneable {
 	}
 	
 	public int numDice() {
-		Turn first = getTurns().get(0);
-		if (first != null)
-			return first.finalThrow().numDice();
-		return -1;
+		if (getTurns().size() == 0)
+			return -1;
+		return getTurns().get(0).latestThrow().numDice();
+	}
+
+	public Calendar getFinishDate() {
+		return this.finishDate;
+	}
+	
+	public boolean isFinished() {
+		return !this.finishDate.equals(StaticOperations.originTime()); // Is not originTime
+	}
+
+	public void setFinished() {
+		if (this.finishDate.equals(StaticOperations.originTime())) // No overwriting this datetime
+			this.finishDate = Calendar.getInstance();
+		else
+			Log.i("Game", "Trying to overwrite existing finish time!");
 	}
 }

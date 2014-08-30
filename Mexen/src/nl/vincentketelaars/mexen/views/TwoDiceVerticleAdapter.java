@@ -3,10 +3,8 @@ package nl.vincentketelaars.mexen.views;
 import java.util.ArrayList;
 
 import nl.vincentketelaars.mexen.R;
-import nl.vincentketelaars.mexen.R.drawable;
-import nl.vincentketelaars.mexen.R.id;
-import nl.vincentketelaars.mexen.R.layout;
 import nl.vincentketelaars.mexen.objects.Throw;
+import nl.vincentketelaars.mexen.objects.Turn;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,12 +17,12 @@ public class TwoDiceVerticleAdapter extends BaseAdapter {
 	private final int[] diceImages = new int[] { R.drawable.d1, R.drawable.d2, R.drawable.d3, R.drawable.d4, R.drawable.d5, R.drawable.d6 };
 	private Context context;
 	private ArrayList<Throw> previousThrows;
- 
+
 	public TwoDiceVerticleAdapter(Context context, ArrayList<Throw> previousThrows) {
 		this.context = context;
 		this.previousThrows = previousThrows;
 	}
- 
+
 	public View getView(int position, View convertView, ViewGroup parent) { 
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (convertView == null) { 			
@@ -35,7 +33,7 @@ public class TwoDiceVerticleAdapter extends BaseAdapter {
 		die1.setImageDrawable(context.getResources().getDrawable(diceImages[previous.getNumberOne() - 1]));
 		ImageView die2 = (ImageView) convertView.findViewById(R.id.vertical_die2);
 		die2.setImageDrawable(context.getResources().getDrawable(diceImages[previous.getNumberTwo() - 1]));
-		
+
 		int width = parent.getWidth();
 		int height = parent.getHeight();
 		int frameWidth = (int) Math.min(width / 10, height * 0.45);
@@ -50,32 +48,39 @@ public class TwoDiceVerticleAdapter extends BaseAdapter {
 		params2.setMargins(frameMargin, frameMargin, frameMargin, frameMargin);
 		die1.setLayoutParams(params1);
 		die2.setLayoutParams(params2);
- 
+
 		return convertView;
 	}
- 
+
 	@Override
 	public int getCount() {
 		return previousThrows.size();
 	}
- 
+
 	@Override
 	public Throw getItem(int position) {
 		return previousThrows.get(position);
 	}
- 
+
 	@Override
 	public long getItemId(int position) {
 		return position;
 	} 
-	
+
 	public void addThrow(Throw t) {
 		previousThrows.add(t);
 		this.notifyDataSetChanged();
 	}
-	
-	public void clearThrows() {
-		previousThrows = new ArrayList<Throw>();
+
+	public void addTurn(Turn turn) {
+		for (Throw th : turn.getThrows())
+			previousThrows.add(th);
 		this.notifyDataSetChanged();
+	}
+
+	public void clearThrows(boolean notify) {
+		previousThrows = new ArrayList<Throw>();
+		if (notify)
+			this.notifyDataSetChanged();
 	}
 }

@@ -16,7 +16,6 @@
 
 package nl.vincentketelaars.mexen.activities;
 
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
 
@@ -75,7 +74,7 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 
 	protected GameMode currentMode = GameMode.FREEPLAY;
 	protected Game currentGame;
-	private ArrayList<Throw> currentThrows;
+	protected Turn currentTurn;
 	private MexGameDbHelper MGDbHelper;
 	private SensorManager sensorManager;
 	private float MINIMUM_ACCELARATION = 2;
@@ -97,7 +96,6 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 		activity = this;
 
 		currentGame = new Game(currentMode);
-		currentThrows = new ArrayList<Throw>();
 
 		MGDbHelper = new MexGameDbHelper(this);
 
@@ -174,13 +172,13 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 				for (int i = 0; i  < dies.length; i++) {
 					if (dies[i].getId() == view.getId()) {
 						if (vastImages[i].getVisibility() == View.VISIBLE) {
-							setUnvast(i);
+							setVast(i, false);
 							break;
 						}
 						if (isSpecialVastCase()) break;
 						if (vastImages[i].getVisibility() == View.INVISIBLE && numVast < dies.length - 1 &&
 								roll[i] < getHighestVastNumber()) { // Only vast till highest allowed number
-							setVast(i);
+							setVast(i, true);
 						}
 					}
 				}
@@ -325,27 +323,14 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 	protected abstract void afterRollDice();
 
 	/**
-	 * Remove vast from die
+	 * Set die vast / unvast
 	 * @param i
 	 */
-	protected void setUnvast(final int i) {
-		vast[i] = false;
+	protected void setVast(final int i, final boolean v) {
+		vast[i] = v;
 		vastImages[i].post(new Runnable() {
 			public void run() {
-				vastImages[i].setVisibility(View.INVISIBLE);
-			} 
-		});
-	}
-
-	/**
-	 * Set die vast
-	 * @param i
-	 */
-	protected void setVast(final int i) {
-		vast[i] = true;
-		vastImages[i].post(new Runnable() {
-			public void run() {
-				vastImages[i].setVisibility(View.VISIBLE);
+				vastImages[i].setVisibility(v ? View.VISIBLE : View.INVISIBLE);
 			} 
 		});
 	}
@@ -363,8 +348,8 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 		return true;
 	}
 
-	protected boolean setDie(int position, int number) {
-		if (position >= roll.length || !changeDiceValueAllowed())
+	protected boolean setDie(int position, int number, boolean forceChange) {
+		if (position >= roll.length || (!changeDiceValueAllowed() && !forceChange))
 			return false;
 		roll[position] = number - 1;
 		animationHandler.sendEmptyMessage(0);
@@ -372,65 +357,103 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 		return true;
 	}
 
-	protected void turnFinished() {
-		Turn t = new Turn(localPlayer(), currentThrows); // TODO: Is this always the local player?
-		currentGame.addTurn(t);
-		currentThrows = new ArrayList<Throw>();
+	protected void storeTurn(boolean finished) {
+		if (finished)
+			currentTurn.setFinished();
+		currentGame.addTurn(currentTurn);
+		if (finished) // Only if the previous turn is finished should a new one be started
+			currentTurn = new Turn(localPlayer()); // TODO: Is this always the local player?
+	}
+	
+	protected void gameFinished() {
+		storeTurn(true);
+		currentGame.setFinished();
+		writeCurrentGameToDb(currentGame);
 	}
 
 	protected void addToThrows(Throw t) {
-		currentThrows.add(t);
+		currentTurn.addThrow(t);
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		Log.i("RollDice", "onStart");
+		currentTurn = new Turn(localPlayer());
+		retrieveCurrentGameFromDb();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.i("RollDice", "onResume");
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		throwOnShake  = sp.getBoolean("pref_shake_throw", false);
 		if (throwOnShake)
 			sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
 					SensorManager.SENSOR_DELAY_NORMAL);
-		retrieveCurrentGameFromDb();
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		Log.i("RollDice", "onPause");
 		sensorManager.unregisterListener(this);
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.i("RollDice", "onStop");
 		currentGame.addPlayer(localPlayer());
-		writeCurrentGameToDb();
+		writeCurrentGameToDb(currentGame);
 	}
 
-	protected void writeCurrentGameToDb() {
-		new CommitGameToDbAsyncTask().execute();
-
+	protected void writeCurrentGameToDb(Game game) {
+		new CommitGameToDbAsyncTask().execute(game);
 	}
 
 	protected void retrieveCurrentGameFromDb() {
-		new RetrieveGameFromDbAsyncTask().execute();		
+		if (currentGame == null || currentGame.getTurns().size() == 0)
+			new RetrieveGameFromDbAsyncTask().execute();		
 	}
 
-	private class CommitGameToDbAsyncTask extends AsyncTask<String, Void, String> {
+	private class CommitGameToDbAsyncTask extends AsyncTask<Game, Void, String> {
 		@Override
-		protected String doInBackground(String... urls) {
-			MGDbHelper.addGameToDatabase(currentGame);
+		protected String doInBackground(Game... games) {
+			MGDbHelper.addGameToDatabase(games[0]);
+			Log.i("RollDice", "Added " + games[0]);
 			return null;
 		}
 	}
 
-	private class RetrieveGameFromDbAsyncTask extends AsyncTask<String, Void, String> {
+	private class RetrieveGameFromDbAsyncTask extends AsyncTask<String, Void, Game> {
 		@Override
-		protected String doInBackground(String... urls) {
-			Game game = MGDbHelper.retrieveLatestGame();
+		protected Game doInBackground(String... urls) {
+			return MGDbHelper.retrieveLatestGame();
+		}
+
+		@Override
+		protected void onPostExecute(Game game) {
+			super.onPostExecute(game);
+			Log.i("RollDice", game != null ? game.toString() : "");
 			// Ensure game is not null and we're playing the same number of dice
-			if (game != null && (game.numDice() == -1 || game.numDice() == numDice())) {
+			if (game != null && !game.isFinished() && (game.numDice() == -1 || game.numDice() == numDice())) {
 				currentGame = game;
 				currentGame.addPlayer(localPlayer());
-				// TODO: Update current gamemode?
+				if (game.getTurns().size() > 0) {
+					Turn latest = game.getTurns().get(game.getTurns().size() - 1);
+					if (!latest.isFinished()) {
+						currentTurn = latest;
+					}
+				}
+				currentMode = currentGame.getGameMode();
+				onGameRetrieved(game);
 			}
-			return null;
 		}
 	}
+	
+	protected abstract void onGameRetrieved(Game game);
 
 	@Override
 	public void onBackPressed() {
@@ -439,7 +462,7 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 
 	private void onExitingGame(final boolean backPressed, final boolean homePressed) {
 		if (currentMode == GameMode.FREEPLAY) {
-			turnFinished();
+			gameFinished();
 			if (backPressed)
 				RollDice.super.onBackPressed();
 			else if (homePressed)
@@ -451,7 +474,7 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 			public void onClick(DialogInterface dialog, int which) {
 				switch (which){
 				case DialogInterface.BUTTON_POSITIVE:
-					turnFinished();
+					gameFinished();
 					if (backPressed)
 						activity.onBackPressed();
 					else if (homePressed)
@@ -472,8 +495,7 @@ public abstract class RollDice extends GenericActivity implements SensorEventLis
 	}
 
 	protected void resetPlay() {
-		turnFinished();
-		writeCurrentGameToDb();
+		gameFinished();
 		currentGame = new Game(currentMode);
 	}
 

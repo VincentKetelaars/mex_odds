@@ -23,8 +23,8 @@ public class GenericActivity extends Activity {
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
+	protected void onStart() {
+		super.onStart();
 		SharedPreferences sp = getSharedPreferences(SHARED_PREFERENCES_FILE, MODE_PRIVATE);
 		if (sp.contains(PLAYER_ID)) {
 			UUID id = UUID.fromString(sp.getString(PLAYER_ID, null));
@@ -37,8 +37,8 @@ public class GenericActivity extends Activity {
 	}
 	
 	@Override
-	protected void onPause() {
-		super.onPause();
+	protected void onStop() {
+		super.onStop();
 		if (localPlayer != null) {
 			SharedPreferences.Editor spe = getSharedPreferences(SHARED_PREFERENCES_FILE, MODE_PRIVATE).edit();
 			spe.putString(PLAYER_ID, localPlayer.getId().toString());

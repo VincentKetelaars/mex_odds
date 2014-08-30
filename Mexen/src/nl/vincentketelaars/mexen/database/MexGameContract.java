@@ -17,13 +17,15 @@ public class MexGameContract {
         public static final String TABLE_NAME = "games";
         public static final String COLUMN_NAME_GAME_ID = "gid";
         public static final String COLUMN_NAME_GAME_MODE = "gamemode";
-        public static final String COLUMN_NAME_DATE_TIME = "datetime";
+        public static final String COLUMN_NAME_START_TIME = "start";
+        public static final String COLUMN_NAME_FINISH_TIME = "finish";
         
         public static final String CREATE_TABLE = "CREATE TABLE " +
                 TABLE_NAME + " (" +
                 COLUMN_NAME_GAME_ID + TEXT_TYPE + PRIMARY + COMMA_SEP +
                 COLUMN_NAME_GAME_MODE + INT_TYPE + COMMA_SEP +
-                COLUMN_NAME_DATE_TIME + INT_TYPE + " )";
+                COLUMN_NAME_START_TIME + INT_TYPE + COMMA_SEP +
+                COLUMN_NAME_FINISH_TIME + INT_TYPE + " )";
         
         public static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
     }
@@ -55,11 +57,15 @@ public class MexGameContract {
         public static final String COLUMN_NAME_GAME_ID = "gid";
         public static final String COLUMN_NAME_TURN_ID = "tid";
         public static final String COLUMN_NAME_PLAYER_ID = "pid";
+        public static final String COLUMN_NAME_FINISH_TIME = "finish";
+        public static final String COLUMN_NAME_THROW_NUMBER = "throw_num";
         
         public static final String CREATE_TABLE = "CREATE TABLE " +
                 TABLE_NAME + " (" +
                 COLUMN_NAME_TURN_ID + TEXT_TYPE + PRIMARY + COMMA_SEP +
                 COLUMN_NAME_GAME_ID + TEXT_TYPE + COMMA_SEP +
+                COLUMN_NAME_FINISH_TIME + INT_TYPE + COMMA_SEP +
+                COLUMN_NAME_THROW_NUMBER + INT_TYPE + COMMA_SEP +
                 COLUMN_NAME_PLAYER_ID + TEXT_TYPE + " )";
         
         public static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
@@ -74,6 +80,9 @@ public class MexGameContract {
         public static final String COLUMN_NAME_THROW_ONE = "t1";
         public static final String COLUMN_NAME_THROW_TWO = "t2";
         public static final String COLUMN_NAME_THROW_THREE = "t3"; // Can be zero
+        public static final String COLUMN_NAME_VAST_ONE = "v1";
+        public static final String COLUMN_NAME_VAST_TWO = "v2";
+        public static final String COLUMN_NAME_VAST_THREE = "v3"; // Can be zero
         
         // We assume here that we're more likely to search for the final throw, than for an entire turn
         // Hence we make the turn id primary
@@ -82,6 +91,9 @@ public class MexGameContract {
                 COLUMN_NAME_THROW_ID + TEXT_TYPE + PRIMARY + COMMA_SEP +
                 COLUMN_NAME_TURN_ID + TEXT_TYPE + COMMA_SEP +
                 COLUMN_NAME_THROW_DATE_TIME + INT_TYPE + COMMA_SEP +
+                COLUMN_NAME_VAST_ONE + INT_TYPE + COMMA_SEP +
+                COLUMN_NAME_VAST_TWO + INT_TYPE + COMMA_SEP +
+                COLUMN_NAME_VAST_THREE + INT_TYPE + COMMA_SEP +
                 COLUMN_NAME_THROW_ONE + INT_TYPE + COMMA_SEP +
                 COLUMN_NAME_THROW_TWO + INT_TYPE + COMMA_SEP +
                 COLUMN_NAME_THROW_THREE + INT_TYPE + " )";

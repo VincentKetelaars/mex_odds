@@ -19,6 +19,7 @@ package nl.vincentketelaars.mexen.activities;
 import java.util.ArrayList;
 
 import nl.vincentketelaars.mexen.R;
+import nl.vincentketelaars.mexen.objects.Game;
 import nl.vincentketelaars.mexen.objects.GameMode;
 import nl.vincentketelaars.mexen.objects.Throw;
 import nl.vincentketelaars.mexen.views.HorizontalListView;
@@ -64,8 +65,8 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Throw t = throwsAdapter.getItem(position);
-				setDie(0, t.getNumberOne());
-				setDie(1, t.getNumberTwo());
+				setDie(0, t.getNumberOne(), false);
+				setDie(1, t.getNumberTwo(), false);
 			}
 		});
 
@@ -218,6 +219,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 			return true;
 		case R.id.mex2_settings:
 			Intent intent = new Intent(this, Mex2DiceSettingsActivity.class);
+			storeTurn(false);
 			startActivity(intent);
 			return true;
 		default:
@@ -269,15 +271,14 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 
 	@Override
 	protected void afterRollDice() {
-		addToThrows(new Throw(getNumber(0), getNumber(1)));
 		switch(currentMode) {
 		case FREEPLAY:
 			break;
 		case PLAYER:
 			boolean v0 = getVast(0);
 			boolean v1 = getVast(1);
-			setUnvast(0);
-			setUnvast(1);
+			setVast(0, false);
+			setVast(1, false);
 			int transcendNumber = automaticTranscendVast ? 3 : 2; // 3 for transcending to next turn, 2 for not
 			if (isMex(getNumber(0), getNumber(1)) || isLow(getNumber(0), getNumber(1))) {
 				currentThrows = -1; // Becomes zero later
@@ -294,7 +295,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 			if (currentThrows > 2)
 				currentThrows = 0;
 			if (currentThrows == 0 && !isPoint(getNumber(0), getNumber(1)))
-				turnFinished();
+				storeTurn(true);
 			setThrowLabel();
 			break;
 		case LOCALGAME:
@@ -303,13 +304,14 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 			Log.e("Roll2Dice", String.format("This GameMode is not handled %s", currentMode));
 			break;			
 		}
+		addToThrows(new Throw(new boolean[]{getVast(0), getVast(1)}, getNumber(0), getNumber(1)));
 	}
 
 	private void updateVastAlready(int already) {
 		for (int i = 0; i < numDice(); i++) {
 			if (already != i) {
 				if ( getNumber(i) <= getHighestVastNumber()) {
-					setVast(i);
+					setVast(i, true);
 					break;
 				}
 			}
@@ -328,7 +330,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 			setThrowButtonLabel(R.string.throw_three);
 			break;
 		default:
-			setThrowButtonLabel(R.string.throw_again);
+			setThrowButtonLabel(R.string.throw_dice);
 		}
 	}
 
@@ -339,7 +341,7 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 			} 
 		});
 	}
-	
+
 	protected boolean changeDiceValueAllowed() {
 		return currentMode != GameMode.PLAYER;
 	}
@@ -347,8 +349,8 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 	@Override
 	protected void resetPlay() {
 		super.resetPlay();
-		throwsAdapter.clearThrows();
-		setUnvast(0); setUnvast(1);
+		throwsAdapter.clearThrows(true);
+		setVast(0, false); setVast(1, false);
 	}
 
 	@Override
@@ -357,17 +359,38 @@ public class Roll2Dice extends RollDice implements OnMenuItemClickListener {
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		automaticVast = sp.getBoolean("pref_auto_withhold", true);
 		highestVastNumber = sp.getInt("pref_auto_withhold_number", 3);
-		automaticTranscendVast = sp.getBoolean("pref_auto_withhold_transcend", true);		
+		automaticTranscendVast = sp.getBoolean("pref_auto_withhold_transcend", true);
 	}
 
 	@Override
 	protected void onPause() {
-		super.onPause();
-		
+		super.onPause();		
 	}
-	
+
 	protected void addToThrows(Throw t) {
 		super.addToThrows(t);
 		addDiceToPrevious(t);		
-	}	
+	}
+
+	@Override
+	protected void onGameRetrieved(Game game) {
+		throwsAdapter.clearThrows(false);
+		if (!currentTurn.isFinished()) {
+			throwsAdapter.addTurn(currentTurn);
+		}
+		currentThrows = currentTurn.getCurrentThrowTurn();
+		Throw t = currentTurn.latestThrow();
+		if (t != null) {
+			setDie(0, t.getNumberOne(), true);
+			setDie(1, t.getNumberTwo(), true);
+			setVast(0, t.getVast(0));
+			setVast(1, t.getVast(1));
+		}
+		setThrowLabel();
+	}
+	
+	protected void storeTurn(boolean finished) {
+		currentTurn.setCurrentThrowTurn(currentThrows);
+		super.storeTurn(finished);
+	}
 }

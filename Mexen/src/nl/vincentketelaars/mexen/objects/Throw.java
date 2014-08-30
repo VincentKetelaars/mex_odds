@@ -6,22 +6,25 @@ import java.util.UUID;
 public class Throw implements Cloneable {
 	
 	private int[] n;
+	private boolean[] v;
 	private Calendar dateTime;
 	private UUID id;
 	
-	public Throw(int... n) {
+	public Throw(boolean[] v, int... n) {
 		this.n = n;
+		this.v = v;
 		this.dateTime = Calendar.getInstance(); // Default locale
 		this.id = UUID.randomUUID();
-		purge();
+		purgeArray();
 	}
 	
-	public Throw(UUID id, long timeMillis, int... n) {
+	public Throw(UUID id, long timeMillis, boolean[] v, int... n) {
 		this.n = n;
+		this.v = v;
 		this.dateTime = Calendar.getInstance();
 		this.dateTime.setTimeInMillis(timeMillis);
 		this.id = id;
-		purge();
+		purgeArray();
 	}
 	
 	public int getNumberOne() {
@@ -38,6 +41,18 @@ public class Throw implements Cloneable {
 		return this.n[2];
 	}
 	
+	public boolean getVast(int dice) {
+		if (dice >= 0 && dice < this.v.length) {
+			return this.v[dice];
+		}
+		return false;
+	}
+	
+	public void setVast(int dice, boolean vast) {
+		if (dice >= 0 && dice < this.v.length)
+			this.v[dice] = vast;
+	}
+	
 	public int numDice() {
 		return this.n.length;
 	}
@@ -49,8 +64,10 @@ public class Throw implements Cloneable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Throw(");
-		for (int n : this.n)
-			sb.append(n + ", ");
+		sb.append(this.id.toString() + ", ");
+		sb.append(Long.toString(this.dateTime.getTimeInMillis()) + ", ");
+		for (int i = 0; i < this.n.length; i++)
+			sb.append(this.n[i] + " " + this.v[i] + ", ");
 		sb.setLength(sb.length() - 2);
 		sb.append(")");
 		return sb.toString();
@@ -59,27 +76,28 @@ public class Throw implements Cloneable {
 	/*
 	 * Ensure that all dice values are valid. Remove any invalid (i.e. create new array)
 	 */
-	private void purge() {
+	private void purgeArray() {
 		int length = 0;
 		for (int i : this.n) {
 			if (i > 0 && i <= 6)
 				length++;
 		}
 		int n[] = new int[length];
+		boolean v[] = new boolean[length];
 		int index = 0;
 		for (int i : this.n) {
 			if (i > 0 && i <= 6) {
 				n[index] = i;
+				v[index] = this.v[index];
 				index++;
 			}
 		}		
 		this.n = n;
+		this.v = v;
 	}
 	
 	public Throw clone() {
-		Throw t = new Throw(this.n);
-		t.dateTime = (Calendar) this.getDateTime();
-		return t;
+		return new Throw(this.id, this.getDateTime().getTimeInMillis(), this.v, this.n);
 	}
 
 	public UUID getId() {
